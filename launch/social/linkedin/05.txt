@@ -1,0 +1,21 @@
+POST 5 — Bell test: the number is 2.828
+ATTACH: assets/05-bell-tsirelson-800.gif
+FIRST COMMENT: https://qubit16.ai/visualizations/bell-test  |  https://claude.ai/artifact/WNzpLEVjQPQAThgAz7JsQx
+OPENING LINE: 98 chars (fold ~140)
+------------------------------------------------------------
+PASTE EVERYTHING BELOW THIS LINE
+------------------------------------------------------------
+
+Every theory in which the world has definite properties before you look is bound by one number: 2.
+
+That is the CHSH inequality. Take four correlation measurements on a pair of particles, combine them as S = |E₁ − E₂ + E₃ + E₄|, and any local hidden-variable account of the universe — however clever, however contrived — gives you S ≤ 2. It is not a statement about apparatus. It is arithmetic about what "the properties were already there" can possibly produce.
+
+Quantum mechanics gives 2.828.
+
+The animation sweeps Bob's analyser while Alice holds at 0° and 45°, and the correlation climbs through the classical ceiling at 22.5°, touches 2√2, and falls away again. Nothing is sampled: E(a,b) = −cos 2(a−b) for the singlet, and the four terms at the peak are exactly ∓0.707.
+
+Two things worth sitting with. The violation is not marginal — it is 41% past the bound, which is why the experiments were decisive once the loopholes closed. And quantum mechanics does not run away to 4, the algebraic maximum. It stops at 2√2, the Tsirelson bound, and nobody has a fully satisfying story for why the universe is exactly this non-local and no more.
+
+Link in the first comment. Free, no account, nothing to install.
+
+#QuantumComputing #Physics #BellTest #QuantumFoundations

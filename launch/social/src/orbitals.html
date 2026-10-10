@@ -1,0 +1,338 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>orbitals</title>
+<style>
+@font-face{font-family:Inter;src:url(inter-latin-variable.woff2) format('woff2');font-weight:100 900;font-display:block}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:800px;height:800px;overflow:hidden}
+body{background:#07090f;font-family:Inter,'Segoe UI',sans-serif;color:#eef2ff;-webkit-font-smoothing:antialiased;position:relative}
+#glow{position:absolute;inset:-200px;background:
+  radial-gradient(600px 500px at 26% 30%, rgba(232,84,122,.17), transparent 62%),
+  radial-gradient(560px 480px at 80% 74%, rgba(91,170,236,.17), transparent 62%),
+  radial-gradient(520px 420px at 62% 8%, rgba(124,106,249,.18), transparent 62%)}
+.wrap{position:absolute;inset:0;padding:36px 40px;contain:layout style paint}
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:#c4baff}
+.dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg in oklab,#5baaec,#e8547a);box-shadow:0 0 12px rgba(232,84,122,.9)}
+.eyebrow .sep{color:#4b5578}
+.eyebrow .b{color:#7ee8d8}
+h1{margin-top:12px;font-size:36px;line-height:1.04;font-weight:800;letter-spacing:-.024em;text-wrap:balance}
+h1 .g{background:linear-gradient(100deg in oklab,#fac96a 0%,#e8547a 52%,#c4baff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin-top:10px;font-size:14px;line-height:1.42;color:#8fa3c8;max-width:718px;text-wrap:pretty}
+.sub b{color:#eef2ff;font-weight:600}
+
+.stage{position:absolute;left:40px;top:178px;width:468px;height:468px;border-radius:14px;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.10),0 26px 70px -28px rgba(0,0,0,.95),0 0 64px -14px rgba(124,106,249,.4)}
+#cloud{display:block;width:468px;height:468px}
+.tag{position:absolute;left:14px;top:12px;font-size:10.5px;font-weight:700;letter-spacing:.14em;color:#c9d4ee;text-transform:uppercase;text-shadow:0 1px 6px #000}
+.scalebar{position:absolute;right:14px;bottom:13px;text-align:right}
+.scalebar .line{height:2px;border-radius:2px;background:linear-gradient(90deg in oklab,rgba(255,255,255,.15),rgba(255,255,255,.75));margin-left:auto}
+.scalebar .t{margin-top:5px;font-size:9.5px;font-weight:700;letter-spacing:.1em;color:#c9d4ee;text-shadow:0 1px 6px #000}
+
+.side{position:absolute;left:532px;top:178px;width:228px;display:flex;flex-direction:column;gap:10px}
+.card{background:linear-gradient(165deg in oklab,rgba(20,26,44,.94),rgba(13,17,32,.9));border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:11px 13px;box-shadow:0 12px 34px -20px #000}
+.card .k{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#7d8cb0}
+.card .v{margin-top:4px;font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.card .n{margin-top:4px;font-size:10.5px;line-height:1.35;color:#8fa3c8;text-wrap:pretty}
+.v.grad{background:linear-gradient(100deg in oklab,#fac96a,#e8547a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.qn{display:flex;gap:7px;margin-top:6px}
+.qn div{flex:1;text-align:center;border-radius:9px;padding:6px 0 7px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07)}
+.qn b{display:block;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.qn span{display:block;margin-top:1px;font-size:8.5px;font-weight:700;letter-spacing:.14em;color:#7d8cb0}
+.sign{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:10.5px;color:#8fa3c8}
+.sw{width:13px;height:13px;border-radius:4px;flex:none}
+.sw.p{background:linear-gradient(135deg in oklab,#fff3cf,#f5a623);box-shadow:0 0 10px rgba(245,166,35,.65)}
+.sw.m{background:linear-gradient(135deg in oklab,#d6fff8,#3bbfff);box-shadow:0 0 10px rgba(59,191,255,.65)}
+
+.strip{position:absolute;left:40px;top:660px;width:468px;display:flex;gap:8px}
+.chip{flex:1;text-align:center;border-radius:10px;padding:9px 0 10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);
+  font-size:12px;font-weight:700;color:#7d8cb0;transition:none}
+.chip.on{background:linear-gradient(150deg in oklab,rgba(232,84,122,.30),rgba(124,106,249,.28));border-color:rgba(255,255,255,.28);color:#fff;box-shadow:0 0 24px -6px rgba(232,84,122,.7)}
+.chip em{font-style:normal}
+
+footer{position:absolute;left:40px;right:40px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#7d8cb0}
+footer .brand{font-weight:800;color:#eef2ff;font-size:13px}
+footer .brand span{color:#7c6af9}
+footer .url{font-weight:600;color:#8fa3c8}
+</style>
+<div id="glow"></div>
+<div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Qubit16<span class="sep">/</span><span class="b">Advanced simulation</span><span class="sep">/</span>Wavefunctions in 3D</div>
+  <h1>An electron is <span class="g">a shape</span>, not an orbit.</h1>
+  <p class="sub">Half a million samples drawn from |&psi;|&sup2; for four exact hydrogen orbitals. <b>Gold is where &psi; is positive, ice is where it is negative</b> &mdash; and every gap between them is a node the electron is never found in.</p>
+
+  <div class="stage">
+    <canvas id="cloud" width="936" height="936"></canvas>
+    <div class="tag" id="tag">2p<sub>z</sub></div>
+    <div class="scalebar"><div class="line" id="sline" style="width:90px"></div><div class="t" id="stext">10 a&#8320;</div></div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <div class="k">Orbital</div>
+      <div class="v grad" id="oname">2p<sub>z</sub></div>
+      <div class="qn">
+        <div><b id="qn">2</b><span>N</span></div>
+        <div><b id="ql">1</b><span>L</span></div>
+        <div><b id="qm">0</b><span>M</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="k">Nodes</div>
+      <div class="v" id="nodes">1</div>
+      <div class="n" id="nodesn">1 angular, 0 radial. Surfaces of exactly zero probability.</div>
+    </div>
+    <div class="card">
+      <div class="k">Mean radius</div>
+      <div class="v" id="rmean">5.0</div>
+      <div class="n">Bohr radii, averaged over the samples on screen.</div>
+    </div>
+    <div class="card">
+      <div class="k">Sign of &psi;</div>
+      <div class="sign"><span class="sw p"></span>&psi; &gt; 0 &mdash; gold</div>
+      <div class="sign"><span class="sw m"></span>&psi; &lt; 0 &mdash; ice</div>
+      <div class="n" style="margin-top:7px">|&psi;|&sup2; hides the sign. Chemistry lives on it.</div>
+    </div>
+  </div>
+
+  <div class="strip" id="strip">
+    <div class="chip on">2p<em>z</em></div>
+    <div class="chip">3p<em>z</em></div>
+    <div class="chip">3d<em>xy</em></div>
+    <div class="chip">4f<em>z&sup3;</em></div>
+  </div>
+
+  <footer>
+    <div class="brand">qubit16<span>.ai</span></div>
+    <div class="url">/visualizations/wavefunctions-3d</div>
+  </footer>
+</div>
+<script>
+// ---------------------------------------------------------------------------
+// Exact hydrogen orbitals, a0 = 1. R_nl up to a constant (the sampler only
+// needs the shape), real spherical harmonics in their usual real combinations.
+// ---------------------------------------------------------------------------
+const ORBITALS = [
+  {
+    key: '2p<sub>z</sub>', n: 2, l: 1, m: 0, ang: 1, rad: 0, rmax: 22, scale: 11.5,
+    R: (r) => r * Math.exp(-r / 2),
+    Y: (ct, st, ph) => ct,
+  },
+  {
+    key: '3p<sub>z</sub>', n: 3, l: 1, m: 0, ang: 1, rad: 1, rmax: 42, scale: 21,
+    R: (r) => r * (6 - r) * Math.exp(-r / 3),
+    Y: (ct, st, ph) => ct,
+  },
+  {
+    key: '3d<sub>xy</sub>', n: 3, l: 2, m: -2, ang: 2, rad: 0, rmax: 42, scale: 19,
+    R: (r) => r * r * Math.exp(-r / 3),
+    Y: (ct, st, ph) => st * st * Math.sin(2 * ph),
+  },
+  {
+    key: '4f<sub>z&sup3;</sub>', n: 4, l: 3, m: 0, ang: 3, rad: 0, rmax: 62, scale: 33,
+    R: (r) => r * r * r * Math.exp(-r / 4),
+    Y: (ct, st, ph) => 5 * ct * ct * ct - 3 * ct,
+  },
+]
+
+const NPTS = 200000
+const rng = (() => { let s = 20260912 >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296) })()
+
+function sampleOrbital(o) {
+  // radial CDF of P(r) = |R(r)|^2 r^2 on a fine grid, then inverse-transform
+  const M = 4000, dr = o.rmax / M
+  const cdf = new Float64Array(M + 1)
+  for (let i = 1; i <= M; i++) {
+    const r = i * dr, R = o.R(r)
+    cdf[i] = cdf[i - 1] + R * R * r * r * dr
+  }
+  const tot = cdf[M]
+  for (let i = 0; i <= M; i++) cdf[i] /= tot
+
+  // angular envelope for rejection
+  let ymax = 0
+  for (let i = 0; i <= 400; i++) {
+    const ct = -1 + 2 * i / 400, st = Math.sqrt(Math.max(0, 1 - ct * ct))
+    for (let j = 0; j < 90; j++) ymax = Math.max(ymax, Math.abs(o.Y(ct, st, 2 * Math.PI * j / 90)))
+  }
+
+  const pts = new Float32Array(NPTS * 4) // x, y, z, sign
+  let rsum = 0
+  for (let k = 0; k < NPTS; k++) {
+    const u = rng()
+    let lo = 0, hi = M
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (cdf[mid] < u) lo = mid; else hi = mid }
+    const r = (lo + (u - cdf[lo]) / (cdf[hi] - cdf[lo] || 1)) * dr
+
+    let ct, st, ph, y
+    do {
+      ct = 2 * rng() - 1
+      st = Math.sqrt(Math.max(0, 1 - ct * ct))
+      ph = 2 * Math.PI * rng()
+      y = o.Y(ct, st, ph)
+    } while (rng() * ymax * ymax > y * y)
+
+    rsum += r
+    const o4 = k * 4
+    pts[o4] = r * st * Math.cos(ph)
+    pts[o4 + 1] = r * st * Math.sin(ph)
+    pts[o4 + 2] = r * ct
+    pts[o4 + 3] = Math.sign(o.R(r) * y) || 1
+  }
+  return { pts, rmean: rsum / NPTS }
+}
+
+const CLOUDS = ORBITALS.map(sampleOrbital)
+
+// ---------------------------------------------------------------------------
+// Volumetric splat: two density buffers (psi > 0, psi < 0), tone-mapped.
+// ---------------------------------------------------------------------------
+const S = 468
+const cv = document.getElementById('cloud')
+const cx = cv.getContext('2d')
+const off = document.createElement('canvas'); off.width = off.height = S
+const octx = off.getContext('2d')
+const oimg = octx.createImageData(S, S)
+const POS = new Float32Array(S * S), NEG = new Float32Array(S * S)
+
+function splat(buf, x, y, w) {
+  const xi = x | 0, yi = y | 0
+  if (xi < 1 || yi < 1 || xi >= S - 1 || yi >= S - 1) return
+  const fx = x - xi, fy = y - yi
+  buf[yi * S + xi] += w * (1 - fx) * (1 - fy)
+  buf[yi * S + xi + 1] += w * fx * (1 - fy)
+  buf[(yi + 1) * S + xi] += w * (1 - fx) * fy
+  buf[(yi + 1) * S + xi + 1] += w * fx * fy
+}
+
+const TILT = 0.36
+function draw(idx, yaw, alpha) {
+  const { pts } = CLOUDS[idx]
+  const o = ORBITALS[idx]
+  const k = (S * 0.44) / o.scale
+  const cy = Math.cos(yaw), sy = Math.sin(yaw)
+  const ctX = Math.cos(TILT), stX = Math.sin(TILT)
+  for (let i = 0; i < NPTS; i++) {
+    const p = i * 4
+    const x0 = pts[p], y0 = pts[p + 1], z0 = pts[p + 2]
+    // yaw about y, then tilt about x
+    const x1 = x0 * cy + z0 * sy
+    const z1 = -x0 * sy + z0 * cy
+    const y2 = y0 * ctX - z1 * stX
+    const z2 = y0 * stX + z1 * ctX
+    const sx = S / 2 + x1 * k
+    const sv = S / 2 - z2 * k          // screen y from the tilted z
+    const depth = 0.5 + 0.5 * Math.max(-1, Math.min(1, y2 / o.scale))
+    splat(pts[p + 3] > 0 ? POS : NEG, sx, sv, alpha * (0.35 + 0.95 * depth * depth))
+  }
+}
+
+function tone(v) { return 1 - Math.exp(-v) }
+
+// two multi-hue ramps, added in light: rose -> amber -> white for psi > 0,
+// violet -> sky -> white-cyan for psi < 0.
+function mkLut(stops) {
+  const lut = new Float32Array(256 * 3)
+  for (let i = 0; i < 256; i++) {
+    const t = i / 255
+    for (let j = 1; j < stops.length; j++) {
+      if (t <= stops[j][0]) {
+        const a = stops[j - 1], b = stops[j]
+        const u = (t - a[0]) / (b[0] - a[0])
+        lut[i * 3] = a[1][0] + (b[1][0] - a[1][0]) * u
+        lut[i * 3 + 1] = a[1][1] + (b[1][1] - a[1][1]) * u
+        lut[i * 3 + 2] = a[1][2] + (b[1][2] - a[1][2]) * u
+        break
+      }
+    }
+  }
+  return lut
+}
+const LUT_P = mkLut([[0,[0,0,0]],[0.22,[112,24,86]],[0.46,[232,84,122]],[0.74,[248,170,42]],[1,[255,250,228]]])
+const LUT_N = mkLut([[0,[0,0,0]],[0.22,[52,38,148]],[0.46,[86,124,240]],[0.74,[56,206,255]],[1,[226,255,255]]])
+
+const TMP = new Float32Array(S * S)
+function blur(buf) {           // separable 1-2-1, twice: creamy instead of speckled
+  for (let pass = 0; pass < 2; pass++) {
+    for (let y = 0; y < S; y++) {
+      const r = y * S
+      let prev = buf[r]
+      for (let x = 1; x < S - 1; x++) {
+        const cur = buf[r + x]
+        TMP[r + x] = 0.25 * prev + 0.5 * cur + 0.25 * buf[r + x + 1]
+        prev = cur
+      }
+      TMP[r] = buf[r]; TMP[r + S - 1] = buf[r + S - 1]
+    }
+    for (let x = 0; x < S; x++) {
+      let prev = TMP[x]
+      for (let y = 1; y < S - 1; y++) {
+        const cur = TMP[y * S + x]
+        buf[y * S + x] = 0.25 * prev + 0.5 * cur + 0.25 * TMP[(y + 1) * S + x]
+        prev = cur
+      }
+    }
+  }
+}
+
+function paint() {
+  blur(POS); blur(NEG)
+  // auto-exposure: put the brightest part of this cloud at the top of the ramp
+  let peak = 0
+  for (let i = 0; i < S * S; i++) {
+    if (POS[i] > peak) peak = POS[i]
+    if (NEG[i] > peak) peak = NEG[i]
+  }
+  const E = peak > 0 ? 2.9 / peak : 1
+  const d = oimg.data
+  for (let i = 0; i < S * S; i++) {
+    const a = Math.min(255, (tone(POS[i] * E) * 255) | 0)
+    const b = Math.min(255, (tone(NEG[i] * E) * 255) | 0)
+    const o4 = i * 4
+    d[o4] = Math.min(255, LUT_P[a * 3] + LUT_N[b * 3] + 7)
+    d[o4 + 1] = Math.min(255, LUT_P[a * 3 + 1] + LUT_N[b * 3 + 1] + 9)
+    d[o4 + 2] = Math.min(255, LUT_P[a * 3 + 2] + LUT_N[b * 3 + 2] + 17)
+    d[o4 + 3] = 255
+  }
+  octx.putImageData(oimg, 0, 0)
+  cx.imageSmoothingEnabled = true
+  cx.imageSmoothingQuality = 'high'
+  cx.clearRect(0, 0, 936, 936)
+  cx.drawImage(off, 0, 0, 936, 936)
+}
+
+const chips = [...document.querySelectorAll('#strip .chip')]
+function frame(k, total) {
+  const per = total / ORBITALS.length
+  const idx = Math.min(ORBITALS.length - 1, Math.floor(k / per))
+  const t = (k % per) / per                     // 0..1 within this orbital
+  const yaw = 2 * Math.PI * k / total * 2       // two turns over the loop
+  const FADE = 0.14
+  POS.fill(0); NEG.fill(0)
+  if (t < FADE && k >= per) {
+    const prev = (idx - 1 + ORBITALS.length) % ORBITALS.length
+    const u = t / FADE
+    draw(prev, yaw, 1 - u)
+    draw(idx, yaw, u)
+  } else {
+    draw(idx, yaw, 1)
+  }
+  paint()
+
+  const o = ORBITALS[idx]
+  document.getElementById('tag').innerHTML = o.key
+  document.getElementById('oname').innerHTML = o.key
+  document.getElementById('qn').textContent = o.n
+  document.getElementById('ql').textContent = o.l
+  document.getElementById('qm').textContent = o.m
+  document.getElementById('nodes').textContent = o.ang + o.rad
+  document.getElementById('nodesn').textContent =
+    `${o.ang} angular, ${o.rad} radial. Surfaces of exactly zero probability.`
+  document.getElementById('rmean').textContent = CLOUDS[idx].rmean.toFixed(1)
+  const aU = Math.round((S * 0.44) / o.scale * 10)
+  document.getElementById('sline').style.width = Math.min(150, aU) + 'px'
+  document.getElementById('stext').innerHTML = '10 a&#8320;'
+  chips.forEach((c, i) => c.classList.toggle('on', i === idx))
+}
+window.frame = frame
+frame(0, 64)
+</script>

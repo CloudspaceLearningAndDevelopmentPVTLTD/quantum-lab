@@ -1,0 +1,2 @@
+# Pinned for reproducible site builds (.github/workflows/pages.yml).
+mkdocs-material==9.7.7

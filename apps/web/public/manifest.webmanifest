@@ -1,0 +1,44 @@
+{
+  "name": "Qubit16",
+  "short_name": "Qubit16",
+  "description": "Interactive quantum visualizations, a browser-based circuit simulator, and a full course — all computed client-side, so it works offline.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07090f",
+  "theme_color": "#7c6af9",
+  "orientation": "any",
+  "categories": ["education", "science"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    },
+    { "src": "/icons/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Circuit Simulator",
+      "short_name": "Simulator",
+      "description": "Build and run quantum circuits in the browser",
+      "url": "/simulator"
+    },
+    {
+      "name": "Course",
+      "short_name": "Course",
+      "description": "Work through the quantum mechanics course",
+      "url": "/learn"
+    },
+    {
+      "name": "Visualizations",
+      "short_name": "Visualizations",
+      "description": "Run the live quantum experiments",
+      "url": "/visualizations"
+    }
+  ]
+}

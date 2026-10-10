@@ -1,0 +1,163 @@
+# Continuous deployment — Azure Container Apps.
+#
+# Runs after CI succeeds on main (or by hand), builds ONLY the services whose
+# source changed with `az acr build`, and points the Container App at the new
+# image. It never touches secrets or env vars: those are owned by
+# infra/azure/deploy.sh. Use that script for anything that is not "ship the
+# latest commit" (first deploy, secret rotation, new env vars, migrations).
+#
+# OFF BY DEFAULT. It does nothing until the repository variable
+# AZURE_DEPLOY_ENABLED is set to 'true' and the Azure OIDC secrets exist — see
+# docs/DEPLOYMENT-AZURE.md § "CD from GitHub Actions". Switched on 2026-10-10 by
+# infra/azure/setup-github-oidc.sh.
+#
+# Why the Supabase check below exists: NEXT_PUBLIC_* are compiled into the web
+# bundle. A web image built without them has sign-in silently switched off
+# (production, 2026-10-03). The job fails rather than ship that.
+
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      services:
+        description: 'Space-separated subset of: web api agent (blank = whatever changed)'
+        required: false
+        default: ''
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false # never abandon a half-finished rollout
+
+permissions:
+  contents: read
+  id-token: write # OIDC to Azure, no stored client secret
+
+env:
+  ACR_NAME: quantumlabacr14409
+  RESOURCE_GROUP: quantum-lab-rg
+  PUBLIC_URL: https://qubit16.ai
+  API_URL: https://quantum-lab-api.icybay-dd842fc2.eastus.azurecontainerapps.io
+
+jobs:
+  deploy:
+    name: Build and roll out changed services
+    if: >-
+      vars.AZURE_DEPLOY_ENABLED == 'true' &&
+      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Decide what to deploy
+        id: plan
+        env:
+          REQUESTED: ${{ inputs.services }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if [ -n "${REQUESTED// /}" ]; then
+            list="$REQUESTED"
+          else
+            # Compare with what is live: the image tag carries the commit it was built from.
+            base="$(git rev-parse "$HEAD_SHA~1" 2>/dev/null || git rev-parse "$HEAD_SHA")"
+            files="$(git diff --name-only "$base" "$HEAD_SHA")"
+            list=""
+            echo "$files" | grep -qE '^(apps/web/|packages/|package(-lock)?\.json)' && list="$list web"
+            echo "$files" | grep -qE '^services/api/'   && list="$list api"
+            echo "$files" | grep -qE '^services/agent/' && list="$list agent"
+          fi
+          echo "services=${list# }" >> "$GITHUB_OUTPUT"
+          echo "Deploying: ${list:-nothing}"
+
+      - name: Refuse a web build with sign-in switched off
+        if: contains(steps.plan.outputs.services, 'web')
+        env:
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON" ]; then
+            echo "::error::Repository variables NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are empty; the web image would ship with accounts off."
+            exit 1
+          fi
+
+      - name: Azure login (OIDC)
+        if: steps.plan.outputs.services != ''
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and roll out
+        if: steps.plan.outputs.services != ''
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SENTRY_DSN: ${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+          TRIAL_DAYS: ${{ vars.NEXT_PUBLIC_LAUNCH_TRIAL_DAYS }}
+          TRIAL_UNTIL: ${{ vars.NEXT_PUBLIC_LAUNCH_TRIAL_UNTIL }}
+          ANALYTICS_ENDPOINT: ${{ vars.NEXT_PUBLIC_ANALYTICS_ENDPOINT }}
+          DEVICE_TUTOR: ${{ vars.NEXT_PUBLIC_DEVICE_TUTOR }}
+        run: |
+          set -euo pipefail
+          tag="gh-${SHA::12}"
+          registry="$ACR_NAME.azurecr.io"
+          for svc in ${{ steps.plan.outputs.services }}; do
+            case "$svc" in
+              web)
+                az acr build -r "$ACR_NAME" -g "$RESOURCE_GROUP" -t "quantum-lab/web:$tag" -f apps/web/Dockerfile \
+                  --build-arg "NEXT_PUBLIC_APP_URL=$PUBLIC_URL" --build-arg "NEXT_PUBLIC_API_URL=$API_URL" \
+                  --build-arg "NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL" --build-arg "NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON" \
+                  --build-arg "NEXT_PUBLIC_SENTRY_DSN=$SENTRY_DSN" --build-arg "NEXT_PUBLIC_LAUNCH_TRIAL_DAYS=$TRIAL_DAYS" \
+                  --build-arg "NEXT_PUBLIC_LAUNCH_TRIAL_UNTIL=$TRIAL_UNTIL" --build-arg "NEXT_PUBLIC_ANALYTICS_ENDPOINT=$ANALYTICS_ENDPOINT" \
+                  --build-arg "NEXT_PUBLIC_DEVICE_TUTOR=$DEVICE_TUTOR" . ;;
+              api)   az acr build -r "$ACR_NAME" -g "$RESOURCE_GROUP" -t "quantum-lab/api:$tag"   -f services/api/Dockerfile   services/api ;;
+              agent) az acr build -r "$ACR_NAME" -g "$RESOURCE_GROUP" -t "quantum-lab/agent:$tag" -f services/agent/Dockerfile services/agent ;;
+              *) echo "::error::unknown service $svc"; exit 1 ;;
+            esac
+            az containerapp update -n "quantum-lab-$svc" -g "$RESOURCE_GROUP" --image "$registry/quantum-lab/$svc:$tag" >/dev/null
+            echo "rolled out $svc -> $tag"
+          done
+
+      - name: Smoke test
+        if: steps.plan.outputs.services != ''
+        run: |
+          set -euo pipefail
+          # The hard checks go to each Container App's own hostname: that is the
+          # thing this job just rolled out, and nothing sits in front of it.
+          # Cloudflare fronts $PUBLIC_URL and its bot protection answers 403 to
+          # a curl from a runner IP (first CD run, 2026-10-09), which says
+          # nothing about the deploy, so the public check is advisory.
+          sleep 45
+          for svc in ${{ steps.plan.outputs.services }}; do
+            fqdn="$(az containerapp show -n "quantum-lab-$svc" -g "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)"
+            case "$svc" in
+              agent) path=/api/agent/health ;;
+              *)     path=/api/health ;;
+            esac
+            curl -fsS --retry 8 --retry-delay 10 --retry-all-errors "https://$fqdn$path" >/dev/null
+            echo "healthy: $svc ($fqdn$path)"
+            if [ "$svc" = web ]; then
+              # The signed-out account page must offer sign-in, not the "no accounts" fallback.
+              if curl -fsS "https://$fqdn/account" | grep -q "NEXT_PUBLIC_SUPABASE_URL"; then
+                echo "::error::/account is in no-accounts mode — Supabase vars missing from the build"; exit 1
+              fi
+            fi
+          done
+          code="$(curl -s -o /dev/null -w '%{http_code}' -A 'Mozilla/5.0 (qubit16 deploy smoke test)' "$PUBLIC_URL/api/health" || true)"
+          case "$code" in
+            200) echo "public: $PUBLIC_URL/api/health -> 200" ;;
+            403) echo "::warning::$PUBLIC_URL answered 403 to the runner (Cloudflare bot protection); the origin checks above passed" ;;
+            *)   echo "::warning::$PUBLIC_URL/api/health answered $code from the runner; the origin checks above passed" ;;
+          esac

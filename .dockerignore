@@ -1,0 +1,90 @@
+# Repo-root .dockerignore
+#
+# This file controls what is sent to the Docker daemon as build context for any
+# build run from the repo root — which is every build here, because apps/web is
+# an npm workspace and its Dockerfile must be able to see the ROOT
+# package.json + package-lock.json (see apps/web/Dockerfile).
+#
+# Two reasons to keep this tight:
+#   1. Speed. The build context is tarred and uploaded to the daemon on every
+#      build; node_modules and .venv alone are hundreds of megabytes.
+#   2. SECURITY. The .env rules below are NOT an optimisation. Anything left in
+#      the build context can end up in an image layer, and image layers are
+#      readable by anyone who can pull the image — `docker history` and
+#      `docker save` both expose them, and deleting the file in a later layer
+#      does NOT remove it from the earlier one. A leaked .env inside a published
+#      image is a real credential-disclosure incident, not a tidiness problem.
+#      Secrets are injected at RUN time (compose `environment:`, Railway/Vercel
+#      variables), never baked in at BUILD time.
+
+# --- Dependencies (reinstalled inside the image from the lockfile) ----------
+node_modules
+**/node_modules
+.npm
+.pnpm-store
+
+# --- Build output (rebuilt inside the image; a host .next is the wrong arch) -
+.next
+**/.next
+out
+**/out
+dist
+build
+*.tsbuildinfo
+
+# --- Python service artefacts ----------------------------------------------
+.venv
+**/.venv
+venv
+**/venv
+__pycache__
+**/__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+
+# --- SECURITY: never ship environment files (see header) --------------------
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+
+# --- VCS / CI / editor ------------------------------------------------------
+.git
+.gitignore
+.github
+.vscode
+.idea
+.DS_Store
+
+# --- Tests, reports, logs ---------------------------------------------------
+test-results
+**/test-results
+playwright-report
+**/playwright-report
+coverage
+**/coverage
+*.log
+**/*.log
+
+# --- Docs and prose (not needed at runtime) ---------------------------------
+docs
+**/docs
+*.md
+!apps/web/app/**/*.md
+
+# --- Deploy configs for other targets ---------------------------------------
+.vercel
+vercel.json
+docker-compose.yml
+
+# Launch/marketing assets: GIF cuts, render sources and the outreach list.
+# None of it is part of any runtime image — it added 21 MB to a 76 MB build
+# context — and launch/social/src/nul is a Windows reserved-device-name
+# artifact that Docker cannot extract at all: `COPY . .` dies with
+# "Error processing tar file(exit status 1): operation not permitted",
+# which names no file and so is near-impossible to trace back. Excluded here
+# as well as in .gitignore, because .gitignore has no effect on the Docker
+# build context.
+launch

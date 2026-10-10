@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app holds no data of its own worth backing up — everything a user
+     cares about (progress, saved circuits, account) lives in the web app's
+     own storage (localStorage inside the browser engine, or Supabase for
+     signed-in accounts), not in this shell's app-private storage. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="." />
+    <exclude domain="database" path="." />
+</full-backup-content>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Qubit16">
+  <title>Qubit16</title>
+  <!--
+    The Qubit16 mark: a Bloch sphere with a state arrow. It is the object the
+    home page lets a visitor play with, so the icon, the wordmark and the
+    first interaction are one idea. Replaces the earlier generic atom.
+
+    MASKABLE SAFE ZONE: declared purpose "any maskable" in the manifest, so a
+    launcher may crop to a circle of about 80 percent of the canvas. Every
+    meaningful shape stays inside the circle of radius 205 centred on
+    (256, 256); the plate bleeds to the full 512 so a cropped render has no
+    transparent corners. No run of two hyphens appears in this comment; that
+    is invalid XML and breaks strict tooling such as rsvg-convert.
+  -->
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1120"/>
+      <stop offset="1" stop-color="#07090f"/>
+    </linearGradient>
+    <radialGradient id="glass" cx="0.38" cy="0.32" r="0.75">
+      <stop offset="0" stop-color="#7c6af9" stop-opacity="0.55"/>
+      <stop offset="0.55" stop-color="#7c6af9" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#7c6af9" stop-opacity="0.04"/>
+    </radialGradient>
+    <radialGradient id="tip" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffe2a6"/>
+      <stop offset="0.5" stop-color="#f5a623"/>
+      <stop offset="1" stop-color="#f5a623" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#plate)"/>
+  <rect x="16" y="16" width="480" height="480" rx="100" ry="100" fill="none" stroke="#1b2338" stroke-width="6"/>
+
+  <!-- Sphere: glass fill, rim, and the equator seen at a tilt. -->
+  <circle cx="256" cy="262" r="168" fill="url(#glass)"/>
+  <circle cx="256" cy="262" r="168" fill="none" stroke="#c4baff" stroke-opacity="0.55" stroke-width="7"/>
+  <!-- Back half of the equator, faint; front half, solid teal. -->
+  <path d="M 88 262 A 168 52 0 0 1 424 262" fill="none" stroke="#3bbfaa" stroke-opacity="0.35" stroke-width="7"/>
+  <path d="M 88 262 A 168 52 0 0 0 424 262" fill="none" stroke="#3bbfaa" stroke-width="9" stroke-linecap="round"/>
+  <!-- Vertical axis, faint. -->
+  <line x1="256" y1="94" x2="256" y2="430" stroke="#8fa3c8" stroke-opacity="0.35" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- State arrow: from the centre toward the upper right, on the equator's front, in superposition. -->
+  <line x1="256" y1="262" x2="356" y2="164" stroke="#07090f" stroke-width="30" stroke-linecap="round"/>
+  <line x1="256" y1="262" x2="356" y2="164" stroke="#7c6af9" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="256" cy="262" r="16" fill="#c4baff"/>
+  <!-- Tip glow and tip. -->
+  <circle cx="366" cy="154" r="58" fill="url(#tip)" opacity="0.7"/>
+  <circle cx="366" cy="154" r="26" fill="#f5a623"/>
+  <circle cx="366" cy="154" r="26" fill="none" stroke="#07090f" stroke-width="6"/>
+</svg>

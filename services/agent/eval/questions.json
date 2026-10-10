@@ -1,0 +1,605 @@
+{
+  "version": 1,
+  "description": "The tutor's graded question set. Consumed by both the Node offline probe (eval/offline_probe.mjs) and the Python retrieval/live graders (eval/grade_retrieval.py, eval/grade_live.py) so all three tiers are graded against exactly the same rubric. Patterns are regular expressions in the syntax common to Python `re` and JavaScript `RegExp`: no lookbehind, no named groups, no possessive quantifiers. They are matched case-insensitively against text put through the normalizer documented in eval/rubric.py.",
+  "refutation_window": 320,
+  "refutation_cues": [
+    "not ",
+    "n't",
+    "never",
+    "no ",
+    "nothing",
+    "wrong",
+    "myth",
+    "misconception",
+    "misleading",
+    "mistake",
+    "false",
+    "incorrect",
+    "rather than",
+    "instead",
+    "tempting",
+    "careful",
+    "sharper",
+    "does not",
+    "cannot",
+    "can't",
+    "is not",
+    "unlike",
+    "contrary",
+    "beyond",
+    "far from",
+    "refut"
+  ],
+  "questions": [
+    {
+      "id": "qubit-vs-bit",
+      "topic": "Qubits",
+      "lesson": "what-is-a-qubit",
+      "level": "beginner",
+      "question": "What is a qubit, and how is it different from a classical bit?",
+      "reference": "A qubit is a two-level quantum system whose state is a unit vector a|0> + b|1> in a two-dimensional complex space, with |a|^2 + |b|^2 = 1. Unlike a bit it can occupy any normalised combination of the two basis states, and a and b are complex amplitudes rather than probabilities. One measurement yields a single classical bit and destroys the rest of the information.",
+      "must_include": [
+        { "name": "two-level system", "any": ["two-level", "two level", "two-dimensional", "two basis states", "\\|0> and \\|1>"] },
+        { "name": "amplitudes, normalised", "any": ["amplitude", "\\|a\\|\\^2 \\+ \\|b\\|\\^2 = 1", "normali"] },
+        { "name": "readout limit", "any": ["one measurement", "single classical bit", "one classical bit", "cannot read", "one bit out"] }
+      ],
+      "must_not_include": [
+        { "name": "qubit stores infinite information", "pattern": "infinite (amount of )?information" }
+      ],
+      "offline_expect": "qubit",
+      "retrieval_expect": ["what-is-a-qubit", "qubit"]
+    },
+    {
+      "id": "superposition-both-0-and-1",
+      "topic": "Superposition",
+      "lesson": "superposition-and-measurement",
+      "level": "beginner",
+      "question": "Is a qubit in superposition just both 0 and 1 at the same time, the way a spinning coin is heads and tails at once?",
+      "reference": "No. A superposition is a definite state of its own that is neither |0> nor |1>, not a classical mixture and not a hidden pre-existing value. The spinning-coin picture is classical ignorance, which predicts different experiment results: H applied twice returns |0> deterministically, which no randomised hidden bit can reproduce. The amplitudes are complex numbers whose magnitudes squared give the measurement odds.",
+      "must_include": [
+        { "name": "definite state that is neither basis state", "any": ["definite (state|direction)", "neither", "state (in its own right|of its own)", "new state"] },
+        { "name": "amplitudes not probabilities", "any": ["amplitude", "complex"] },
+        { "name": "why the classical picture fails", "any": ["interference", "hidden", "second hadamard", "applying a second", "twice"] }
+      ],
+      "must_not_include": [
+        { "name": "classical both-0-and-1 claim", "pattern": "(is|it's|its|being) (literally |simply |just )?both (a )?0 and (a )?1" },
+        { "name": "secretly already one value", "pattern": "secretly (already )?(a )?(0|1|zero|one)" }
+      ],
+      "offline_expect": "superposition",
+      "retrieval_expect": ["superposition-and-measurement", "what-is-a-qubit", "superposition"]
+    },
+    {
+      "id": "parallel-universes-speedup",
+      "topic": "Where the speedup comes from",
+      "lesson": "interference",
+      "level": "beginner",
+      "question": "Does a quantum computer get its speed by trying all possible answers in parallel?",
+      "reference": "No. A register of n qubits carries amplitudes over 2^n basis states, but a measurement returns only n classical bits, so nothing is gained by 'having' all the answers. The speedup comes from arranging interference so amplitudes for wrong answers cancel and the right one adds, which only works for problems with the right structure.",
+      "must_include": [
+        { "name": "readout is one bitstring", "any": ["one bitstring", "n classical bits", "single .{0,20}(answer|bitstring|sample)", "returns just", "one sample", "exactly one"] },
+        { "name": "interference does the work", "any": ["interfer", "cancel"] },
+        { "name": "only some problems", "any": ["structure", "no advantage", "not (a |simply )?(just )?a fast", "only .{0,30}problems", "for most"] }
+      ],
+      "must_not_include": [
+        { "name": "tries every answer in parallel", "pattern": "tr(y|ies|ying) (out )?(all|every) (possible )?(answers|solutions|paths)" }
+      ],
+      "offline_expect": "quantum computer",
+      "retrieval_expect": ["interference", "grover", "what-is-a-qubit", "superposition-and-measurement"]
+    },
+    {
+      "id": "measurement-born-rule",
+      "topic": "Measurement",
+      "lesson": "superposition-and-measurement",
+      "level": "intermediate",
+      "question": "What actually happens when you measure a qubit in the computational basis?",
+      "reference": "You get 0 with probability |a|^2 and 1 with probability |b|^2 (the Born rule), and the state immediately afterwards is the basis state you found. Measurement is the one non-unitary, irreversible step; it is basis-dependent, so a state that looks random in Z can be deterministic in X.",
+      "must_include": [
+        { "name": "Born rule probabilities", "any": ["born rule", "\\|a\\|\\^2", "probability \\|"] },
+        { "name": "state update", "any": ["collapse", "afterwards", "leaves the qubit", "project"] },
+        { "name": "basis dependence", "any": ["basis-dependent", "basis dependent", "x basis", "measuring along x", "rotate before measuring", "depends on what you"] }
+      ],
+      "must_not_include": [
+        { "name": "measurement is reversible", "pattern": "measurement is reversible" }
+      ],
+      "offline_expect": "measure",
+      "retrieval_expect": ["superposition-and-measurement", "measurement"]
+    },
+    {
+      "id": "measurement-universe-chooses",
+      "topic": "Measurement",
+      "lesson": "superposition-and-measurement",
+      "level": "beginner",
+      "question": "When I measure a qubit, does the universe check it and choose an answer for me?",
+      "reference": "That is a story, not physics. Nothing in the formalism singles out an observer, a mind or a cosmic referee: measurement is an interaction that entangles the qubit with an apparatus, after which the Born rule gives the outcome statistics and the state you ascribe afterwards is the observed branch. Whether that update is a physical process or a bookkeeping change is exactly what the interpretations argue about, and every interpretation makes the same predictions.",
+      "must_include": [
+        { "name": "no special observer / mechanism", "any": ["interpret", "no .{0,25}observer", "not .{0,25}(conscious|universe|mind)", "interaction", "entangle"] },
+        { "name": "Born rule statistics", "any": ["born rule", "probabilit", "\\|a\\|\\^2"] },
+        { "name": "predictions unchanged", "any": ["same (either way|predictions)", "predictions are the same", "argue about", "same statistics"] }
+      ],
+      "must_not_include": [
+        { "name": "universe decides", "pattern": "the universe (decides|chooses|checks|picks)" },
+        { "name": "consciousness causes collapse", "pattern": "conscious(ness)? (causes|collapses|triggers)" }
+      ],
+      "offline_expect": "measure",
+      "retrieval_expect": ["superposition-and-measurement", "measurement", "qubit"]
+    },
+    {
+      "id": "interference-double-slit",
+      "topic": "Interference",
+      "lesson": "interference",
+      "level": "beginner",
+      "question": "Why does the double-slit fringe pattern disappear as soon as you find out which slit the particle went through?",
+      "reference": "Because interference requires the paths to be indistinguishable. When the paths are indistinguishable you add amplitudes and then square; once anything anywhere records which path was taken, the alternatives are distinguishable and you add probabilities instead, so the cross terms that make the fringes vanish. No mechanical 'kick' from the detector is needed.",
+      "must_include": [
+        { "name": "amplitudes add before squaring", "any": ["add the (complex )?amplitudes", "amplitudes .{0,30}(add|sum)", "sum(med)? before", "add amplitudes"] },
+        { "name": "which-path destroys it", "any": ["which[- ]path", "which slit", "distinguishable", "records"] },
+        { "name": "add probabilities instead", "any": ["add probabilities", "probabilities instead", "fringes (disappear|vanish|wash)"] }
+      ],
+      "must_not_include": [
+        { "name": "detector physically kicks the particle", "pattern": "detector (physically )?(disturbs|kicks|bumps)" }
+      ],
+      "offline_expect": "interference",
+      "retrieval_expect": ["interference", "superposition-and-measurement"]
+    },
+    {
+      "id": "hadamard-gate",
+      "topic": "Gates",
+      "lesson": "gates-and-circuits",
+      "level": "beginner",
+      "question": "What does the Hadamard gate do, and why does applying it twice get you back where you started?",
+      "reference": "H maps |0> to (|0> + |1>)/sqrt(2) and |1> to (|0> - |1>)/sqrt(2). Its matrix is (1/sqrt(2))[[1,1],[1,-1]], it is unitary and its own inverse, so H·H = I: the minus sign in the image of |1> makes the two branches interfere destructively on one outcome and constructively on the other.",
+      "must_include": [
+        { "name": "action on |0>", "any": ["\\(\\|0> \\+ \\|1>\\)", "equal superposition"] },
+        { "name": "self-inverse", "any": ["own inverse", "h.h = i", "twice", "self-inverse"] },
+        { "name": "the minus sign / phase", "any": ["\\|0> - \\|1>", "minus sign", "-1", "phase"] }
+      ],
+      "must_not_include": [
+        { "name": "H randomises the qubit", "pattern": "h (gate )?(randomi[sz]es|makes it random)" }
+      ],
+      "offline_expect": "hadamard",
+      "retrieval_expect": ["gates-and-circuits", "hadamard", "superposition-and-measurement"]
+    },
+    {
+      "id": "phase-global-vs-relative",
+      "topic": "Phase",
+      "lesson": "gates-and-circuits",
+      "level": "intermediate",
+      "question": "What is the difference between a global phase and a relative phase?",
+      "reference": "A global phase multiplying the whole state is unobservable and can be discarded. A relative phase between components, as in (|0> + e^{i phi}|1>)/sqrt(2), changes nothing about Z-basis probabilities but rotates the state around the Bloch equator and completely changes what happens once the components are interfered, e.g. by a Hadamard.",
+      "must_include": [
+        { "name": "global phase unobservable", "any": ["global phase", "unobservable", "discard"] },
+        { "name": "relative phase observable via interference", "any": ["relative phase", "interfer", "equator"] },
+        { "name": "invisible in Z probabilities", "any": ["does not change the probabilit", "no(t| ) .{0,25}probabilities", "z basis", "computational basis"] }
+      ],
+      "must_not_include": [
+        { "name": "phase is unmeasurable full stop", "pattern": "phase (is|can) ?(never|not) be (measured|observed)" }
+      ],
+      "offline_expect": "phase",
+      "retrieval_expect": ["gates-and-circuits", "phase", "interference"]
+    },
+    {
+      "id": "bloch-sphere",
+      "topic": "Bloch sphere",
+      "lesson": "what-is-a-qubit",
+      "level": "beginner",
+      "question": "What does the Bloch sphere show, and what are its limits?",
+      "reference": "It draws every pure single-qubit state cos(theta/2)|0> + e^{i phi} sin(theta/2)|1> as a point on a unit ball: |0> at the north pole, |1> at the south, equal superpositions on the equator with phi the relative phase. Note the half-angle: orthogonal states sit at opposite poles. Mixed states live inside the ball. It is a one-qubit picture only — two entangled qubits have no such individual picture.",
+      "must_include": [
+        { "name": "poles and equator", "any": ["north pole", "poles", "equator"] },
+        { "name": "mixed states inside", "any": ["inside the ball", "mixed state", "centre|center"] },
+        { "name": "one qubit only", "any": ["one qubit", "single qubit", "does not extend", "only works for"] }
+      ],
+      "must_not_include": [
+        { "name": "Bloch sphere shows two qubits", "pattern": "bloch sphere (for|of) (two|multiple|n) qubits"}
+      ],
+      "offline_expect": "bloch",
+      "retrieval_expect": ["what-is-a-qubit", "bloch_sphere"]
+    },
+    {
+      "id": "bell-state-preparation",
+      "topic": "Entanglement",
+      "lesson": "gates-and-circuits",
+      "level": "beginner",
+      "question": "How do I build a Bell state on two qubits, and what counts should I see?",
+      "reference": "Apply H to qubit 0, then CNOT with qubit 0 as control and qubit 1 as target, giving (|00> + |11>)/sqrt(2). Measuring both in the computational basis gives roughly 50% '00' and 50% '11' and essentially never '01' or '10'; off-pattern counts on hardware are noise.",
+      "must_include": [
+        { "name": "H then CNOT", "any": ["hadamard.{0,40}cnot", "h .{0,20}(then|followed by).{0,20}c(not|x)", "h q\\[0\\]", "one h .{0,20}one cnot"] },
+        { "name": "the state", "any": ["\\(\\|00> \\+ \\|11>\\)", "00.{0,10}\\+.{0,10}11"] },
+        { "name": "expected counts", "any": ["50%", "half", "never .{0,10}(01|'01')", "only .{0,20}(00|'00')"] }
+      ],
+      "must_not_include": [
+        { "name": "CNOT copies the qubit", "pattern": "cnot copies the (state|qubit)" }
+      ],
+      "offline_expect": "bell",
+      "retrieval_expect": ["gates-and-circuits", "entanglement", "bell_state"]
+    },
+    {
+      "id": "entanglement-definition",
+      "topic": "Entanglement",
+      "lesson": "entanglement",
+      "level": "intermediate",
+      "question": "What does it actually mean for two qubits to be entangled?",
+      "reference": "Their joint state cannot be written as a tensor product of two single-qubit states. Neither qubit has a state of its own — each alone is maximally mixed — while the pair is in a perfectly definite joint state. The resulting correlations violate Bell inequalities, so no pre-agreed classical strategy reproduces them.",
+      "must_include": [
+        { "name": "not a product state", "any": ["cannot be written as a (tensor )?product", "not .{0,20}separable", "no factorization", "tensor product"] },
+        { "name": "reduced state is mixed / random alone", "any": ["maximally mixed", "neither qubit has a state of its own", "no state of its own", "completely random", "uniformly random", "looks .{0,15}random"] },
+        { "name": "Bell inequality", "any": ["bell inequalit", "chsh", "local hidden"] }
+      ],
+      "must_not_include": [
+        { "name": "entangled qubits are just correlated coins", "pattern": "just (like )?(two )?(correlated|matching) (coins|dice|gloves)" }
+      ],
+      "offline_expect": "entangle",
+      "retrieval_expect": ["entanglement", "entanglement_concept", "bell_state"]
+    },
+    {
+      "id": "entanglement-no-signalling",
+      "topic": "Entanglement",
+      "lesson": "entanglement",
+      "level": "intermediate",
+      "question": "If Alice measures her half of an entangled pair, does anything change for Bob? Could they use that to communicate faster than light?",
+      "reference": "Nothing observable changes at Bob's end. His reduced state is maximally mixed before and after Alice's measurement, and no choice she makes alters his local statistics — that is the no-communication theorem. The correlation only becomes visible once the two records are compared over an ordinary classical channel, which travels no faster than light.",
+      "must_include": [
+        { "name": "local statistics unchanged", "any": ["statistics do not change", "unaffected", "local statistics", "maximally mixed", "still (uniformly )?random", "nothing observable"] },
+        { "name": "no signalling", "any": ["no[- ]communication", "cannot be used to send", "no signal", "cannot .{0,20}signal"] },
+        { "name": "classical channel to see it", "any": ["classical channel", "compar(e|ed|ing)", "after the .{0,20}results"] }
+      ],
+      "must_not_include": [
+        { "name": "FTL communication claim", "pattern": "(send|transmit)(s|ing)? (a )?(message|information|signal)s? faster than light" },
+        { "name": "measuring changes the far qubit", "pattern": "(changes|alters) (the )?(far|other|distant) (qubit|party|particle)" }
+      ],
+      "offline_expect": "entangle",
+      "retrieval_expect": ["entanglement", "entanglement_concept"]
+    },
+    {
+      "id": "bell-correlations-every-basis",
+      "topic": "Entanglement",
+      "lesson": "entanglement",
+      "level": "advanced",
+      "question": "In the Bell state (|00> + |11>)/sqrt(2), are the two qubits perfectly correlated in every measurement basis?",
+      "reference": "No. |Phi+> is a +1 eigenstate of XX and of ZZ, so matched X measurements agree and matched Z measurements agree — but (Y tensor Y)|Phi+> = -|Phi+>, so matched Y measurements ANTI-correlate: <YY> = -1. The three are not independent: YY = -XX*ZZ. 'Perfectly correlated in every basis' is a property no Bell state has.",
+      "must_include": [
+        { "name": "X and Z agree", "any": ["xx.{0,30}(\\+1|agree|correlat)", "<zz> = <xx> = \\+1", "matched x", "x and z"] },
+        { "name": "Y anti-correlates", "any": ["<yy> = -1", "yy = -1", "y.{0,40}anti-?correlat", "matched y .{0,40}(disagree|anti)", "\\(y ?\\⊗? ?y\\)"] },
+        { "name": "not every basis", "any": ["not a property", "every basis", "no bell state has", "yy = -xx"] }
+      ],
+      "must_not_include": [
+        { "name": "perfectly correlated in every basis", "pattern": "(perfectly )?correlat(ed|ion)( in| along)? (every|all|any) (measurement )?bas[ei]s" }
+      ],
+      "offline_expect": "bell",
+      "retrieval_expect": ["entanglement", "bell_state"]
+    },
+    {
+      "id": "tunnelling-mechanism",
+      "topic": "Tunnelling",
+      "lesson": "tunneling",
+      "level": "intermediate",
+      "question": "How does quantum tunnelling work, and what sets the transmission probability?",
+      "reference": "Inside a barrier with V > E the Schrodinger equation gives real exponentials rather than oscillations, so psi decays as e^{-kappa x} with kappa = sqrt(2m(V-E))/hbar instead of stopping dead. A small but nonzero amplitude survives to the far face and resumes travelling, with transmission roughly exp(-2 kappa L): exponential in the barrier width and in the square root of the energy shortfall.",
+      "must_include": [
+        { "name": "exponential decay inside", "any": ["exponential", "e\\^\\{?-kappa", "decay"] },
+        { "name": "transmission formula", "any": ["exp\\(-2", "e\\^\\{?-2", "-2.{0,12}kappa"] },
+        { "name": "width / energy dependence", "any": ["width", "barrier w", "square root of the energy"] }
+      ],
+      "must_not_include": [
+        { "name": "particle goes over the barrier", "pattern": "goes over the (top|barrier)" }
+      ],
+      "offline_expect": "tunnel",
+      "retrieval_expect": ["tunneling"]
+    },
+    {
+      "id": "tunnelling-borrowed-energy",
+      "topic": "Tunnelling",
+      "lesson": "tunneling",
+      "level": "intermediate",
+      "question": "I read that a tunnelling particle briefly borrows energy from the vacuum to get over the barrier and pays it back. Is that right?",
+      "reference": "No. Energy is conserved throughout: a particle of energy E emerges from the barrier with exactly E, never E plus something, and the whole time-independent calculation runs at a single fixed E. Nothing is borrowed and the particle never goes over the top. What changes inside the barrier is the character of the solution — a real decaying exponential with no oscillation, hence no local wavelength and no well-defined local kinetic energy.",
+      "must_include": [
+        { "name": "energy conserved / unchanged", "any": ["energy is conserved", "exactly the energy", "same energy", "unchanged", "fixed e", "single .{0,10}e"] },
+        { "name": "nothing borrowed", "any": ["nothing is borrowed", "no energy is borrowed", "not a loophole", "nothing to borrow"] },
+        { "name": "what does change", "any": ["decaying exponential", "exponentially decaying", "character of the solution", "no local", "not well defined", "not well-defined"] }
+      ],
+      "must_not_include": [
+        { "name": "borrowed-energy story", "pattern": "borrow(s|ed|ing)? (the )?energy" },
+        { "name": "uncertainty principle licence", "pattern": "uncertainty principle (lets|allows|permits)" }
+      ],
+      "offline_expect": "tunnel",
+      "retrieval_expect": ["tunneling"]
+    },
+    {
+      "id": "grover-speedup",
+      "topic": "Grover",
+      "lesson": "grover",
+      "level": "intermediate",
+      "question": "How much faster is Grover's algorithm than classical search, and what happens if I run too many iterations?",
+      "reference": "About sqrt(N) oracle queries versus N/2 classically — a quadratic speedup, not an exponential one, and it is provably optimal. After roughly (pi/4)sqrt(N) iterations the marked amplitude is near maximal; running past that rotates the state further and the success probability falls again.",
+      "must_include": [
+        { "name": "sqrt N / quadratic", "any": ["sqrt\\(n\\)", "sqrt n", "quadratic"] },
+        { "name": "not exponential", "any": ["not exponential", "quadratic, not exponential", "provably optimal", "rather than exponential"] },
+        { "name": "overshoot", "any": ["overshoot", "too many iterations", "falls again", "less likely"] }
+      ],
+      "must_not_include": [
+        { "name": "Grover is an exponential speedup", "pattern": "grover.{0,40}exponential speedup" }
+      ],
+      "offline_expect": "grover",
+      "retrieval_expect": ["grover"]
+    },
+    {
+      "id": "shor-how-it-works",
+      "topic": "Shor",
+      "lesson": "shor",
+      "level": "advanced",
+      "question": "How does Shor's algorithm actually factor a number?",
+      "reference": "It reduces factoring to period finding: pick a random a coprime to N and find the period r of f(x) = a^x mod N; then gcd(a^{r/2} +- 1, N) usually gives a nontrivial factor. Only the period finding is quantum — prepare a superposition over x, compute modular exponentiation, apply the QFT so the amplitudes interfere constructively at multiples related to 1/r, measure, and recover r by continued fractions.",
+      "must_include": [
+        { "name": "period / order finding", "any": ["period", "order finding"] },
+        { "name": "modular exponentiation function", "any": ["a\\^x mod n", "a\\^\\{?x\\}? mod", "modular exponentiation"] },
+        { "name": "QFT", "any": ["fourier", "qft"] }
+      ],
+      "must_not_include": [
+        { "name": "tries all factors at once", "pattern": "tries (all|every) (possible )?(factor|divisor)s" }
+      ],
+      "offline_expect": "shor",
+      "retrieval_expect": ["shor"]
+    },
+    {
+      "id": "shor-rsa-timeline",
+      "topic": "Shor",
+      "lesson": "shor",
+      "level": "intermediate",
+      "question": "Does Shor's algorithm mean RSA falls tomorrow, as soon as someone builds a small quantum computer?",
+      "reference": "No. 2048-bit RSA needs a few thousand error-corrected LOGICAL qubits and on the order of 10^10 logical gate operations. Each logical qubit costs roughly a thousand to ten thousand physical qubits under the surface code at today's ~10^-3 error rates, plus magic-state factories; the standard estimate (Gidney and Ekera, 2021) is about twenty million physical qubits running for about eight hours. Existing devices are in the low thousands of physical qubits without full error correction — three to four orders of magnitude short. The real deadline is harvest-now-decrypt-later, which is why post-quantum migration is happening now.",
+      "must_include": [
+        { "name": "logical vs physical distinction", "any": ["logical qubit", "error-corrected", "logical"] },
+        { "name": "resource estimate", "any": ["twenty million", "20 million", "millions of physical", "thousand.{0,40}physical qubits per logical", "10\\^?6", "gidney"] },
+        { "name": "distance from today's hardware", "any": ["orders of magnitude", "nowhere near", "far beyond", "low thousands", "not .{0,20}immediate"] }
+      ],
+      "must_not_include": [
+        { "name": "RSA already broken / falls tomorrow", "pattern": "rsa (is|has been|will be) (already )?(broken|dead) (tomorrow|next year|today)" },
+        { "name": "a small device suffices", "pattern": "(a )?small quantum computer (can|could|will) break rsa" }
+      ],
+      "offline_expect": "shor",
+      "retrieval_expect": ["shor", "error-correction"]
+    },
+    {
+      "id": "qkd-vs-post-quantum",
+      "topic": "Cryptography",
+      "lesson": "quantum-cryptography",
+      "level": "intermediate",
+      "question": "Is quantum key distribution the same thing as post-quantum cryptography?",
+      "reference": "No — they are different technologies solving overlapping problems. QKD (BB84, E91) uses quantum states over a physical quantum channel so that eavesdropping is detectable; it needs special hardware, is distance-limited without repeaters, provides no authentication, and only distributes keys. Post-quantum cryptography is classical software — ML-KEM, ML-DSA, SLH-DSA, standardised by NIST in 2024 — whose hard problems have no known efficient quantum attack; it runs on existing hardware and networks and covers signatures too. PQC is the migration actually happening at internet scale.",
+      "must_include": [
+        { "name": "they are different", "any": ["not the same", "different", "unlike", "whereas"] },
+        { "name": "QKD is hardware / quantum channel", "any": ["bb84", "quantum channel", "hardware", "photon", "no[- ]cloning", "eavesdrop"] },
+        { "name": "PQC is classical algorithms", "any": ["ml-kem", "kyber", "dilithium", "lattice", "classical algorithms", "post-quantum cryptograph.{0,60}(classical|software|algorithm)", "software"] }
+      ],
+      "must_not_include": [
+        { "name": "QKD is post-quantum cryptography", "pattern": "(qkd|quantum key distribution) is (a form of )?post-quantum cryptography" },
+        { "name": "QKD provides authentication", "pattern": "qkd (provides|gives|includes) authentication" }
+      ],
+      "offline_expect": "quantum key distribution",
+      "retrieval_expect": ["quantum-cryptography", "no_cloning"]
+    },
+    {
+      "id": "logical-vs-physical-qubit",
+      "topic": "Error correction",
+      "lesson": "error-correction",
+      "level": "intermediate",
+      "question": "What is the difference between a logical qubit and a physical qubit?",
+      "reference": "A physical qubit is one noisy device — a transmon, an ion, a spin. A logical qubit is an error-corrected abstraction spread across many physical ones so that syndrome measurements reveal errors without revealing the encoded state. At today's ~10^-3 gate error rates the surface code needs roughly a thousand or more physical qubits per logical qubit (distance 25-30 for a 10^-15 logical error rate), plus magic-state factories for non-Clifford gates. So a headline physical qubit count is not a count of usable logical qubits.",
+      "must_include": [
+        { "name": "logical is encoded across many physical", "any": ["spread across", "encoded", "many physical", "per logical"] },
+        { "name": "overhead number", "any": ["1,?000", "thousand", "d\\^2", "distance"] },
+        { "name": "syndrome / no-cloning constraint", "any": ["syndrome", "stabilizer", "no[- ]cloning", "threshold"] }
+      ],
+      "must_not_include": [
+        { "name": "logical qubit equals physical qubit", "pattern": "logical qubit is (just )?(a|one) physical qubit" }
+      ],
+      "offline_expect": "logical qubit",
+      "retrieval_expect": ["error-correction", "error_correction"]
+    },
+    {
+      "id": "decoherence-t1-t2",
+      "topic": "Decoherence",
+      "lesson": "error-correction",
+      "level": "intermediate",
+      "question": "What is decoherence, and what do T1 and T2 measure?",
+      "reference": "Decoherence is what happens when a qubit becomes entangled with its uncontrolled environment: the environment ends up holding which-path information, the off-diagonal terms of the qubit's density matrix decay, and interference is lost. T1 is the energy-relaxation time (|1> decaying toward |0>); T2 is the dephasing time over which relative phase randomises, and T2 <= 2*T1.",
+      "must_include": [
+        { "name": "entangling with the environment", "any": ["environment", "which[- ]path"] },
+        { "name": "T1 relaxation", "any": ["t1", "relaxation"] },
+        { "name": "T2 dephasing", "any": ["t2", "dephasing", "off-diagonal"] }
+      ],
+      "must_not_include": [
+        { "name": "decoherence is just random noise added", "pattern": "decoherence is (just|simply) (random )?noise" }
+      ],
+      "offline_expect": "decoher",
+      "retrieval_expect": ["error-correction", "decoherence"]
+    },
+    {
+      "id": "no-cloning",
+      "topic": "No-cloning",
+      "lesson": "quantum-cryptography",
+      "level": "intermediate",
+      "question": "Why can't you copy an unknown quantum state?",
+      "reference": "Linearity forbids it: a unitary that maps |psi>|0> to |psi>|psi> for two non-orthogonal states cannot also do so for their superposition, because linearity forces a cross term the copy would not have. Orthogonal states — and hence classical bits — can be copied freely. No-cloning rules out naive repetition codes, forces syndrome-based error correction, and underpins QKD security.",
+      "must_include": [
+        { "name": "linearity argument", "any": ["linearit", "linear", "cross term"] },
+        { "name": "orthogonal states are copyable", "any": ["orthogonal", "classical bits"] },
+        { "name": "consequences", "any": ["error correction", "key distribution", "qkd", "eavesdrop", "repetition"] }
+      ],
+      "must_not_include": [
+        { "name": "no-cloning is about measurement disturbance only", "pattern": "no[- ]cloning (is|just) because measurement disturbs" }
+      ],
+      "offline_expect": "no-cloning",
+      "retrieval_expect": ["quantum-cryptography", "no_cloning", "error-correction"]
+    },
+    {
+      "id": "teleportation",
+      "topic": "Teleportation",
+      "lesson": null,
+      "level": "intermediate",
+      "question": "How does quantum teleportation move a state, and does it beat the speed of light?",
+      "reference": "Alice and Bob share a Bell pair. Alice makes a joint Bell-basis measurement on the unknown qubit and her half, getting two random classical bits, and sends them over an ordinary channel; Bob applies I, X, Z or ZX accordingly and recovers the state exactly. Nothing outruns light — Bob's qubit is maximally mixed and useless until the classical bits arrive — and no-cloning is respected because Alice's copy is destroyed by her measurement.",
+      "must_include": [
+        { "name": "Bell pair + Bell measurement", "any": ["bell pair", "bell.{0,20}measurement", "entangled pair"] },
+        { "name": "two classical bits", "any": ["two .{0,20}classical bits", "two bits", "classical channel"] },
+        { "name": "no FTL / no cloning", "any": ["faster than light", "no[- ]cloning", "destroyed"] }
+      ],
+      "must_not_include": [
+        { "name": "matter is transported", "pattern": "(teleports|transports|moves) (the )?(matter|particle|atom) itself" }
+      ],
+      "offline_expect": "teleport",
+      "retrieval_expect": ["teleportation", "entanglement"]
+    },
+    {
+      "id": "vqe-nisq",
+      "topic": "NISQ",
+      "lesson": "vqe-and-nisq",
+      "level": "advanced",
+      "question": "What is VQE, and why is it the algorithm people run on today's noisy hardware?",
+      "reference": "VQE is a variational hybrid: a shallow parameterised circuit prepares a trial state, the quantum device estimates the expectation value of the Hamiltonian by sampling Pauli terms, and a classical optimiser updates the parameters, using the variational principle that the energy is an upper bound on the ground-state energy. Shallow circuits fit inside NISQ coherence times, but measurement costs scale badly with the number of Pauli terms and barren plateaus can flatten the optimisation landscape.",
+      "must_include": [
+        { "name": "variational / hybrid loop", "any": ["variational", "classical optimi", "parameteri[sz]ed"] },
+        { "name": "expectation value of a Hamiltonian", "any": ["hamiltonian", "expectation value", "ground[- ]state energy"] },
+        { "name": "why NISQ / limits", "any": ["shallow", "coherence", "barren plateau", "noise", "measurement cost"] }
+      ],
+      "must_not_include": [
+        { "name": "VQE has a proven exponential speedup", "pattern": "vqe .{0,40}(proven|guaranteed) (exponential )?speedup" }
+      ],
+      "offline_expect": "vqe",
+      "retrieval_expect": ["vqe-and-nisq"]
+    },
+    {
+      "id": "qft-role",
+      "topic": "QFT",
+      "lesson": "shor",
+      "level": "advanced",
+      "question": "What does the quantum Fourier transform actually buy you, given that you cannot read the amplitudes out?",
+      "reference": "The QFT maps |x> to a superposition whose phases wind as exp(2 pi i x y / 2^n) and needs only about n^2/2 gates, exponentially fewer than a classical FFT on a vector of the same length — but that is not itself a speedup, because the amplitudes are not readable. Its use is to convert a periodicity hidden in a state into a measurable peak, which is what phase estimation and Shor's algorithm rely on.",
+      "must_include": [
+        { "name": "not a speedup by itself", "any": ["not .{0,40}speedup", "cannot .{0,20}read", "does not by itself"] },
+        { "name": "period becomes measurable", "any": ["period", "peak", "frequency", "phase estimation"] },
+        { "name": "gate count", "any": ["n\\^2", "controlled[- ]phase", "hadamards? and controlled"] }
+      ],
+      "must_not_include": [
+        { "name": "QFT computes the classical FFT faster", "pattern": "(qft|quantum fourier transform) (computes|does) (the )?(classical )?fft faster" }
+      ],
+      "offline_expect": "qft",
+      "retrieval_expect": ["shor", "qft"]
+    },
+    {
+      "id": "qaoa-status",
+      "topic": "QAOA",
+      "lesson": null,
+      "level": "advanced",
+      "question": "What is QAOA, and does it beat classical optimizers on real problems yet?",
+      "reference": "QAOA encodes an optimization problem (e.g. MaxCut) as a cost Hamiltonian and applies p alternating cost and mixer layers, exp(-i gamma C) and exp(-i beta sum X_i), whose 2p angles a classical optimizer tunes variationally; as p grows the schedule can approximate an adiabatic sweep. Honestly framed: it does not solve NP-hard problems efficiently, there is no demonstrated quantum advantage at NISQ-runnable depths, p=1 MaxCut is provably beaten by classical Goemans-Williamson (0.878), and low-depth QAOA is fundamentally local. It is a heuristic whose large-p behaviour is an open question.",
+      "must_include": [
+        { "name": "alternating cost/mixer layers", "any": ["alternat", "mixer", "cost (hamiltonian|layer)"] },
+        { "name": "classical variational outer loop", "any": ["classical optimi", "variational", "2p (angles|parameters)"] },
+        { "name": "honest status: no demonstrated advantage", "any": ["no demonstrated (quantum )?advantage", "goemans", "heuristic"] }
+      ],
+      "must_not_include": [
+        { "name": "QAOA solves NP-hard efficiently", "pattern": "solves? np-hard problems (efficiently|in polynomial time)" },
+        { "name": "QAOA already beats classical optimizers", "pattern": "qaoa (already |consistently )?(beats|outperforms) classical optimi[sz]ers" }
+      ],
+      "offline_expect": "qaoa",
+      "retrieval_expect": ["qaoa", "vqe-and-nisq", "vqe"]
+    },
+    {
+      "id": "quantum-advantage-experiments",
+      "topic": "Quantum advantage",
+      "lesson": null,
+      "level": "intermediate",
+      "question": "What did the quantum supremacy and quantum advantage experiments, like Google's in 2019, actually demonstrate?",
+      "reference": "Google's 53-qubit Sycamore performed random circuit sampling, verified by cross-entropy benchmarking. The claimed 10,000-year classical equivalent was contested by IBM (days) and later reproduced by tensor-network methods in hours — expected, since 'advantage' is relative to the best known classical algorithm and therefore provisional. The task was chosen to be classically hard, not useful: random circuit sampling and boson sampling have no known application. The experiments are engineering milestones about coherent control of ~50+ qubits, not evidence that quantum computers beat classical ones on practical problems.",
+      "must_include": [
+        { "name": "the task was sampling", "any": ["random circuit sampling", "sampl"] },
+        { "name": "benchmark, not useful computation", "any": ["no known application", "not useful computation", "benchmark", "chosen to be (classically )?hard"] },
+        { "name": "classical algorithms caught up / claim is provisional", "any": ["tensor[- ]network", "ibm argued", "classical .{0,60}(hours|days|caught|improved)", "provisional", "best known classical"] }
+      ],
+      "must_not_include": [
+        { "name": "beats classical at everything", "pattern": "(beats?|outperforms?) classical (computers? |machines? )?(at|on) (everything|every task|all problems)" },
+        { "name": "practical advantage shown", "pattern": "prov(es|ed|en) (a )?practical (quantum )?(advantage|speedup)" }
+      ],
+      "offline_expect": "quantum supremacy",
+      "retrieval_expect": ["quantum_advantage", "quantum_speedup"]
+    },
+    {
+      "id": "annealing-vs-gate-model",
+      "topic": "Annealing",
+      "lesson": null,
+      "level": "intermediate",
+      "question": "Is quantum annealing the same kind of computing as the gate model, and can an annealer do everything a gate-model machine can?",
+      "reference": "No. An annealer encodes an optimization problem as an Ising cost Hamiltonian whose ground state is the answer, starts in the ground state of a transverse field, and ramps slowly, relying on the adiabatic theorem and tunneling. It is not universal: it only accepts optimization-format problems and cannot run Shor or error-corrected circuits, so annealer qubit counts are not comparable to gate-model counts. Idealized adiabatic computation is polynomially equivalent to the gate model, but hardware annealers implement a restricted stoquastic class; and there is no demonstrated scaling advantage over classical heuristics like simulated annealing.",
+      "must_include": [
+        { "name": "Ising / ground-state encoding", "any": ["ising", "ground state"] },
+        { "name": "not universal / cannot run Shor", "any": ["not universal", "cannot run shor", "only .{0,40}optimi[sz]ation", "restricted"] },
+        { "name": "no demonstrated scaling advantage", "any": ["no demonstrated scaling advantage", "no (demonstrated|proven) .{0,20}(speedup|advantage)", "simulated annealing", "classical heuristics"] }
+      ],
+      "must_not_include": [
+        { "name": "annealer runs Shor / breaks RSA", "pattern": "anneal(er|ers|ing)? (can|could|will) (run shor|break rsa|factor numbers)" },
+        { "name": "annealer qubits comparable to gate-model", "pattern": "annealer qubits? (are|is) (directly )?comparable to gate" }
+      ],
+      "offline_expect": "quantum annealing",
+      "retrieval_expect": ["quantum_annealing", "tunneling"]
+    },
+    {
+      "id": "t1-vs-t2",
+      "topic": "Decoherence",
+      "lesson": null,
+      "level": "intermediate",
+      "question": "What do the coherence times T1 and T2 actually measure, and why can T2 never be more than twice T1?",
+      "reference": "T1 is the energy relaxation time: |1> decays toward |0> as exp(-t/T1). T2 is the dephasing time: the relative phase of a superposition randomizes, seen as decay of the off-diagonal density-matrix elements while populations can survive. T2 <= 2*T1 because losing energy also scrambles phase — amplitude damping alone imposes 1/T2 = 1/(2*T1), and pure dephasing (1/T2 = 1/(2*T1) + 1/T_phi) only shortens it. T1 is measured by exciting and waiting; T2 by Ramsey (T2*) or Hahn echo.",
+      "must_include": [
+        { "name": "T1 is energy relaxation", "any": ["energy relaxation", "t1.{0,80}(relax|decay)", "\\|1>.{0,40}\\|0>"] },
+        { "name": "T2 is dephasing / phase randomisation", "any": ["dephas", "relative phase.{0,40}random", "off-diagonal"] },
+        { "name": "T2 at most 2 T1", "any": ["t2 <= 2", "twice t1", "2\\*t1", "2t1"] },
+        { "name": "why: energy loss scrambles phase", "any": ["amplitude damping", "losing energy.{0,60}(phase|scrambl)", "1/\\(2\\*?t1\\)"] }
+      ],
+      "must_not_include": [
+        { "name": "T2 can exceed 2T1", "pattern": "t2 (can|may|often) (be )?(much )?(longer|larger|greater) than (2|twice)\\s?\\*?\\s?t1" }
+      ],
+      "offline_expect": "coherence time",
+      "retrieval_expect": ["t1_t2", "decoherence", "error-correction"]
+    },
+    {
+      "id": "state-space-not-parallel-universes",
+      "topic": "Where the speedup comes from",
+      "lesson": null,
+      "level": "beginner",
+      "question": "n qubits have 2^n amplitudes, so is a quantum computer really farming the work out to parallel universes?",
+      "reference": "No. The 2^n amplitudes are the cost of describing the state classically — bookkeeping, not a workforce. A measurement returns n classical bits, one sample rather than 2^n answers; and if exponentially many universes did the work, unstructured search would be instant, whereas Grover's provably optimal sqrt(N) is quadratic. The mechanism is interference — phases arranged so wrong answers cancel — and it works only on structured problems. Many-worlds is an interpretation making the same predictions as every other; speedups neither require it nor evidence it.",
+      "must_include": [
+        { "name": "amplitudes are description cost, not workers", "any": ["describ", "bookkeeping", "not .{0,20}workforce"] },
+        { "name": "measurement returns n bits / one sample", "any": ["n classical bits", "one sample", "single (sample|bitstring)", "cannot be collected"] },
+        { "name": "Grover's sqrt(N) contradicts free parallelism", "any": ["sqrt\\(n\\)", "quadratic", "provably optimal"] },
+        { "name": "interference is the mechanism", "any": ["interfer", "cancel"] }
+      ],
+      "must_not_include": [
+        { "name": "universes do the work", "pattern": "universes (are )?(each )?(really )?(do|does|doing|perform|performing)(s|ing)? (the|your|part of (the|your)) (work|computation|computing)" }
+      ],
+      "offline_expect": "parallel universes",
+      "retrieval_expect": ["parallel_universes", "quantum_speedup", "interference"]
+    },
+    {
+      "id": "qubit-hardware-platforms",
+      "topic": "Hardware",
+      "lesson": null,
+      "level": "beginner",
+      "question": "What are qubits actually made of, and is one hardware platform clearly winning?",
+      "reference": "The leading platforms realize the same two-level mathematics in different physics. Superconducting transmons: nanosecond-scale gates, chip fabrication, but microsecond-scale coherence, millikelvin refrigeration, mostly nearest-neighbour coupling. Trapped ions: coherence of seconds, best gate fidelities, all-to-all coupling in a trap, but slow gates and scaling still being engineered. Neutral atoms, photonics and silicon spins each bring their own trade-offs. There is no clear winner: platforms trade speed, coherence, connectivity and manufacturability, and error correction reshuffles what matters. The formalism is identical on every platform.",
+      "must_include": [
+        { "name": "superconducting platform named", "any": ["superconducting", "transmon"] },
+        { "name": "trapped-ion platform named", "any": ["trapped[- ]ion", "ion trap", "atomic levels"] },
+        { "name": "no clear winner / trade-offs", "any": ["no clear winner", "trade", "not .{0,20}settled", "open question"] },
+        { "name": "same mathematics on every platform", "any": ["same mathematics", "identical (formalism|mathematics)", "any .{0,20}two-level"] }
+      ],
+      "must_not_include": [
+        { "name": "a platform has already won", "pattern": "(superconducting|trapped[- ]ions?|photonics?|neutral atoms?) (qubits? )?(has|have) (already |clearly )?won" }
+      ],
+      "offline_expect": "hardware platform",
+      "retrieval_expect": ["hardware_platforms", "qubit", "what-is-a-qubit"]
+    }
+  ]
+}

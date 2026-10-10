@@ -1,0 +1,133 @@
+# Engineering documentation site for Qubit16 — published to Cloudflare Pages
+# (docs.qubit16.ai) by .github/workflows/pages.yml. Source pages live in website/; the internal
+# operator docs in docs/ are a separate thing and are deliberately not served.
+#
+# Build locally:  pip install mkdocs-material && mkdocs serve
+
+site_name: Qubit16 Engineering
+site_description: >-
+  How qubit16.ai is built — architecture, the browser quantum simulator,
+  services, security, testing and deployment of the open-source platform by
+  Cloudspace Learning and Development Private Limited.
+site_url: https://docs.qubit16.ai/
+repo_url: https://github.com/CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab
+repo_name: quantum-lab
+edit_uri: edit/main/website/
+copyright: >-
+  © 2026 Cloudspace Learning and Development Private Limited · MIT licence
+
+docs_dir: website
+site_dir: site
+
+theme:
+  name: material
+  language: en
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+extra_css:
+  - stylesheets/qubit16.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab
+    - icon: fontawesome/solid/globe
+      link: https://qubit16.ai
+
+nav:
+  - Overview:
+      - index.md
+      - Principles: principles.md
+      - Monorepo: monorepo.md
+  - Architecture:
+      - architecture/index.md
+      - Request lifecycle & trust boundaries: architecture/trust-boundaries.md
+      - Web application: architecture/web.md
+      - Data & accounts: architecture/data.md
+      - Billing & entitlements: architecture/billing.md
+  - Simulator:
+      - simulator/index.md
+      - Gate set & OpenQASM 3: simulator/gates-and-qasm.md
+      - Execution, measurement & classical control: simulator/execution.md
+      - Verification against Qiskit: simulator/verification.md
+      - GPU, stabilizer & other engines: simulator/engines.md
+      - Research tools: simulator/research-tools.md
+  - Platform:
+      - Course & certification: platform/learning.md
+      - AI tutor & agent: platform/tutor.md
+      - Real quantum hardware: platform/hardware.md
+      - Workbench: platform/workbench.md
+      - Mobile apps: platform/mobile.md
+  - Security:
+      - security/index.md
+      - Rate limiting & abuse: security/rate-limiting.md
+      - Dependencies & supply chain: security/supply-chain.md
+  - Quality:
+      - quality/index.md
+      - CI pipeline: quality/ci.md
+      - Accessibility & responsive: quality/accessibility.md
+  - Operations:
+      - operations/index.md
+      - Deployment: operations/deployment.md
+      - Observability & email: operations/observability.md
+  - Engineering practices: practices.md
+  - Contributing: contributing.md

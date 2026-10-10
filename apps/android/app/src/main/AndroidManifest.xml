@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This is a Trusted Web Activity (TWA), not a WebView wrapper. LauncherActivity
+  (from com.google.androidbrowserhelper, Chrome team's own TWA library) hands
+  the whole screen to the device's verified browser engine with no address bar,
+  pointed at https://qubit16.ai. That is what gives this app every web feature
+  — all 44 visualizations, the circuit simulator, the AI tutor, hardware job
+  submission, billing, and the Paths/Glossary added 2026-09-18 — on day one,
+  with zero re-implementation and zero risk of the app silently falling behind
+  the site. See docs/ANDROID.md for the full architecture rationale.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Notification delegation: reserved so that, once web push is wired up
+         server-side, it can render as a native notification bearing this app's
+         icon rather than Chrome's. No delegation service exists yet. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:name="ai.qubit16.app.Qubit16Application"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.Qubit16.Splash"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true">
+
+        <activity
+            android:name="ai.qubit16.app.LauncherActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Qubit16.Splash"
+            android:exported="true"
+            android:alwaysRetainTaskState="true"
+            android:windowSoftInputMode="adjustResize">
+
+            <!-- The single source of truth for which origin this app launches
+                 and is verified against. Both come from build.gradle.kts's
+                 manifestPlaceholders so there is exactly one place to change
+                 the host. -->
+            <meta-data
+                android:name="android.support.customtabs.trusted.DEFAULT_URL"
+                android:value="${defaultUrl}" />
+
+            <meta-data
+                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
+                android:resource="@color/colorPrimary" />
+            <meta-data
+                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR_DARK"
+                android:resource="@color/colorBackgroundDark" />
+            <meta-data
+                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
+                android:resource="@color/colorBackground" />
+            <meta-data
+                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK"
+                android:resource="@color/colorBackgroundDark" />
+            <meta-data
+                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
+                android:resource="@color/colorBackground" />
+
+            <!-- Native splash: same background_color/theme_color as
+                 apps/web/public/manifest.webmanifest, so the transition from
+                 tapping the icon to the site painting its own header is
+                 seamless rather than a colour flash. -->
+            <meta-data
+                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
+                android:resource="@drawable/ic_splash_mark" />
+            <meta-data
+                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
+                android:resource="@color/colorBackgroundDark" />
+            <meta-data
+                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
+                android:value="300" />
+
+            <meta-data
+                android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
+                android:value="${applicationId}.fileprovider" />
+
+            <!-- Pre-declares trust so the very first launch does not have to
+                 wait on a live Digital Asset Links fetch. Must be kept in
+                 sync with apps/web/public/.well-known/assetlinks.json — see
+                 docs/ANDROID.md "Digital Asset Links". -->
+            <meta-data
+                android:name="asset_statements"
+                android:resource="@string/asset_statements" />
+
+            <!-- "default", not "immersive": immersive hides the system status
+                 and navigation bars, which collides with the site's own bottom
+                 tab bar (a swipe from the bottom edge to reveal the system bar
+                 lands on it) and removes the visible back affordance. The bar
+                 colours set above already make the system bars match the site. -->
+            <meta-data
+                android:name="android.support.customtabs.trusted.DISPLAY_MODE"
+                android:value="default" />
+            <meta-data
+                android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
+                android:value="unspecified" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Verified App Links: once assetlinks.json is live, a link to
+                 https://qubit16.ai/* shared in any app opens straight into
+                 this one — no "open with" dialog. Falls back gracefully to
+                 the browser until verification succeeds. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="@string/hostName" />
+            </intent-filter>
+        </activity>
+
+        <!-- App shortcuts (long-press the launcher icon): Simulator, Course,
+             Learning Paths, Visualizations — mirrors the three PWA shortcuts
+             in apps/web/public/manifest.webmanifest, swapping in Paths
+             (2026-09-18) as the fourth slot; four is the safe cross-device
+             maximum for static shortcuts. -->
+        <activity-alias
+            android:name="ai.qubit16.app.LauncherActivityAlias"
+            android:targetActivity="ai.qubit16.app.LauncherActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity-alias>
+
+        <!-- Delegates web push (once wired up) to a native notification with
+             this app's icon instead of Chrome's. This is androidbrowserhelper's
+             own service, referenced directly rather than subclassed — the
+             standard pattern every published TWA sample uses. Inert until the
+             site calls the Notification Delegation API; safe to ship ahead of
+             that. -->
+        <service
+            android:name="com.google.androidbrowserhelper.trusted.DelegationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE" />
+            </intent-filter>
+        </service>
+        <meta-data
+            android:name="android.support.customtabs.trusted.NOTIFICATION_PERMISSION_REQUEST_ENABLED"
+            android:value="true" />
+        <meta-data
+            android:name="androidx.browser.trusted.smallIconId"
+            android:resource="@drawable/ic_notification" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <!-- The "Quantum Tip" home-screen widget: native Kotlin/Glance, reads
+             nothing from the network, cycles a small offline set of glossary
+             definitions daily via WorkManager. See widget/. -->
+        <receiver
+            android:name="ai.qubit16.app.widget.QuantumTipWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quantum_tip_widget_info" />
+        </receiver>
+    </application>
+</manifest>

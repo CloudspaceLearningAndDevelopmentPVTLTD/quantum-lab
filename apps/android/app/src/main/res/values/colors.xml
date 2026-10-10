@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Lifted directly from apps/web/app/globals.css and lib/theme/tokens.ts's
+  dark-theme block (the default theme) — not re-picked, so the native chrome
+  (status bar, splash, widget) never drifts from the web palette.
+
+  Web token names, for cross-reference (CSS custom properties, not usable
+  literally inside an XML comment): q violet, q violet strong, q teal, bg,
+  surface, ink.
+-->
+<resources>
+    <color name="colorPrimary">#7C6AF9</color>       <!-- theme_color in manifest.webmanifest -->
+    <color name="colorPrimaryDark">#5B47D6</color>    <!-- q-violet-strong -->
+    <color name="colorAccentTeal">#4EDBCA</color>     <!-- q-teal -->
+    <color name="colorBackground">#07090F</color>     <!-- bg (dark theme, the app default) -->
+    <color name="colorBackgroundDark">#07090F</color>
+    <color name="colorSurface">#0D1120</color>        <!-- surface -->
+    <color name="colorOnBackground">#EEF2FF</color>   <!-- ink -->
+    <color name="widgetBackground">#0D1120</color>
+    <color name="widgetOnBackground">#EEF2FF</color>
+    <color name="widgetAccent">#A99DFF</color>        <!-- q-violet (dark) -->
+</resources>

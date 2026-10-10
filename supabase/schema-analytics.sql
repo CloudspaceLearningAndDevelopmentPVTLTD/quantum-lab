@@ -1,0 +1,87 @@
+-- ============================================================
+-- Quantum Lab — aggregate analytics ingestion schema
+--
+-- Run this in the Supabase SQL editor AFTER schema.sql. The app boots
+-- and works completely without it: apps/web/lib/analytics/track.ts is
+-- local-first — every event is written to the visitor's own browser
+-- localStorage and read back by /insights, and NOTHING is ever
+-- transmitted off the device unless BOTH NEXT_PUBLIC_ANALYTICS_ENDPOINT
+-- (build-time, client) and ANALYTICS_SUPABASE_TABLE (server) are set.
+-- With either unset — the default — apps/web/app/api/analytics/route.ts
+-- accepts a posted batch, validates it, and discards it, saying so in
+-- the response. This table is what turns that endpoint into a real sink,
+-- so an operator can see aggregate drop-off instead of flying blind.
+--
+-- ############################################################
+-- #  THIS TABLE IS WRITTEN ONLY BY THE SERVICE ROLE.         #
+-- #                                                          #
+-- #  apps/web/app/api/analytics/route.ts holds the service   #
+-- #  role and is the only writer — a client never gets a     #
+-- #  Supabase credential that could write here directly. RLS #
+-- #  is enabled with NO POLICY, so anon/authenticated can do #
+-- #  nothing at all; the service role bypasses RLS. Do not   #
+-- #  add a client-writable policy: an INSERT policy open to  #
+-- #  anon would let anyone flood this table directly,        #
+-- #  bypassing the route's rate limit, batch cap and         #
+-- #  sanitization (see RATE-1 / VAL-1 in that route).        #
+-- ############################################################
+--
+-- WHAT IS AND ISN'T HERE: no IP address, no user agent, no cookie, no
+-- account id, no email. `session_id` is a random per-tab id generated
+-- client-side in track.ts — it identifies a browser tab for the
+-- duration of one session, never a person or a device across sessions.
+-- `props` is whatever apps/web/lib/analytics/events.ts's sanitizeProps
+-- lets through, which is a flat, allow-listed set of primitives — never
+-- free text a visitor typed.
+--
+-- HONESTY NOTE, same as the other schema-*.sql files: this has never
+-- been run against a live Supabase project. The shape matches exactly
+-- what apps/web/app/api/analytics/route.ts's storeEvents() inserts.
+-- Check it before trusting it.
+-- ============================================================
+
+create table if not exists public.analytics_events (
+  id         bigint generated always as identity primary key,
+
+  -- One of the allow-listed EventName values in
+  -- apps/web/lib/analytics/events.ts — never arbitrary text.
+  name       text not null,
+
+  -- The event's own client-side timestamp (ISO-8601, from track.ts),
+  -- not the insert time — the two can differ by however long the event
+  -- sat in the local buffer before a flush.
+  at         timestamptz not null,
+
+  -- Sanitized, flat key/value pairs. jsonb rather than typed columns
+  -- because the event vocabulary in lib/analytics/events.ts grows over
+  -- time and this table should not need a migration for every new one.
+  props      jsonb not null default '{}'::jsonb,
+
+  session_id text not null check (char_length(session_id) <= 100),
+
+  received_at timestamptz not null default now()
+);
+
+comment on table public.analytics_events is
+  'Aggregate product-usage events, opted into per-device (DNT/GPC and the /insights toggle both suppress transmission before this table is ever reached). Service-role insert only — see the banner above.';
+comment on column public.analytics_events.session_id is
+  'Per-tab random id from lib/analytics/track.ts, not a user or device id. Dies with the tab; never linkable across sessions.';
+comment on column public.analytics_events.received_at is
+  'When this row was inserted, for retention/cleanup queries — use `at` for anything about user behavior.';
+
+-- The query this table exists to answer is "what happened, in what
+-- order, over what window" — both indexes serve that directly.
+create index if not exists analytics_events_at_idx
+  on public.analytics_events (at desc);
+create index if not exists analytics_events_name_at_idx
+  on public.analytics_events (name, at desc);
+
+-- ── Row level security ───────────────────────────────────────
+-- Enabled with NO policies, deliberately. See the banner at the top
+-- of this file before changing anything here.
+alter table public.analytics_events enable row level security;
+
+-- ── Retention ─────────────────────────────────────────────────
+-- Not enforced here (no pg_cron dependency assumed). If this table
+-- grows large, run periodically, e.g. from a scheduled job:
+--   delete from public.analytics_events where received_at < now() - interval '180 days';

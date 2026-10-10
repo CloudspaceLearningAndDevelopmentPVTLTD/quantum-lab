@@ -1,0 +1,143 @@
+/* Qubit16 engineering docs — brand palette on top of Material for MkDocs.
+   The colour tokens mirror apps/web/app/globals.css so the site reads as the
+   same product. */
+
+:root {
+  --md-primary-fg-color: #5b47d6;
+  --md-primary-fg-color--light: #6a58e2;
+  --md-primary-fg-color--dark: #4a39b8;
+  --md-accent-fg-color: #4a39b8;
+  --md-accent-fg-color--transparent: rgba(91, 71, 214, 0.1);
+  --q16-teal: #1f9c8f;
+  --q16-amber: #b8712e;
+  --q16-rose: #c0503f;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #0b0e18;
+  --md-default-fg-color: #eef2ff;
+  --md-default-fg-color--light: #c7d0ea;
+  --md-default-fg-color--lighter: #8fa3c8;
+  --md-code-bg-color: #0d1120;
+  --md-primary-fg-color: #6a58e2;
+  --md-accent-fg-color: #a99dff;
+  --md-accent-fg-color--transparent: rgba(169, 157, 255, 0.12);
+  --md-typeset-a-color: #c1bbfe;
+  --q16-teal: #4edbca;
+  --q16-amber: #f2a96a;
+  --q16-rose: #e57969;
+}
+
+.md-header,
+.md-tabs {
+  background: linear-gradient(90deg, #5b47d6 0%, #4a39b8 60%, #2d6a8f 100%);
+}
+
+/* Hero on the landing page */
+.q16-hero {
+  margin: 0 0 2rem;
+  padding: 2.2rem 2rem;
+  border-radius: 1rem;
+  background:
+    radial-gradient(60rem 20rem at 10% -40%, rgba(169, 157, 255, 0.35), transparent 60%),
+    radial-gradient(40rem 16rem at 100% 120%, rgba(78, 219, 202, 0.28), transparent 60%),
+    var(--md-code-bg-color);
+  border: 1px solid rgba(127, 127, 160, 0.25);
+}
+.q16-hero h1 {
+  margin: 0 0 0.6rem;
+  font-size: 2.1rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.q16-hero p {
+  max-width: 48rem;
+  font-size: 0.95rem;
+}
+
+/* Stat tiles */
+.q16-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.8rem;
+  margin: 1.5rem 0 2rem;
+}
+.q16-stat {
+  padding: 1rem 1.1rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(127, 127, 160, 0.25);
+  background: var(--md-code-bg-color);
+}
+.q16-stat strong {
+  display: block;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: var(--md-primary-fg-color);
+  font-variant-numeric: tabular-nums;
+}
+[data-md-color-scheme="slate"] .q16-stat strong {
+  color: #c1bbfe;
+}
+.q16-stat span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* Card grid for section links */
+.q16-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0 2rem;
+}
+.q16-card {
+  padding: 1rem 1.1rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(127, 127, 160, 0.25);
+  background: var(--md-code-bg-color);
+  transition: border-color 0.15s, transform 0.15s;
+}
+.q16-card:hover {
+  border-color: var(--md-primary-fg-color);
+  transform: translateY(-1px);
+}
+.q16-card h3 {
+  margin: 0 0 0.3rem;
+  font-size: 0.95rem;
+}
+.q16-card p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* Inline tags */
+.q16-tag {
+  display: inline-block;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  margin-right: 0.3rem;
+}
+.q16-tag--teal { color: var(--q16-teal); }
+.q16-tag--amber { color: var(--q16-amber); }
+.q16-tag--rose { color: var(--q16-rose); }
+
+/* Tables: a little denser than the theme default */
+.md-typeset table:not([class]) {
+  font-size: 0.74rem;
+}
+.md-typeset table:not([class]) th {
+  background: var(--md-code-bg-color);
+}
+
+/* Mermaid diagrams get breathing room */
+.md-typeset .mermaid {
+  margin: 1.2rem 0 1.6rem;
+}

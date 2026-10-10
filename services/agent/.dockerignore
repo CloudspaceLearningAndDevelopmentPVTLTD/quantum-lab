@@ -1,0 +1,33 @@
+# services/agent/.dockerignore
+#
+# The root .dockerignore does NOT apply to this image: Docker reads
+# <context>/.dockerignore and this service is built with
+# `build: ./services/agent`. Without this file the context included
+# services/agent/.venv, several hundred megabytes of host-built virtualenv.
+#
+# NOTE THE ABSENCE OF `data`. data/course_index.json is a runtime artifact, not
+# a build leftover — the RAG layer reads it and the image COPYs it. Excluding it
+# makes the tutor silently stop retrieving from the course. See the header of
+# this service's Dockerfile.
+#
+# SECURITY: the .env rules keep credentials out of image layers, which stay
+# readable via `docker history` / `docker save`. Secrets are run-time only.
+
+.venv
+venv
+__pycache__
+**/__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+
+.env
+.env.*
+!.env.example
+
+tests
+docs
+*.md
+railway.json
+Dockerfile
+.dockerignore

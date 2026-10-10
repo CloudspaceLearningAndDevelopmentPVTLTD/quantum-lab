@@ -1,0 +1,33 @@
+# Test-only dependencies for the agent service.
+#
+# WHY THIS FILE EXISTS RATHER THAN A LINE IN requirements.txt
+# -----------------------------------------------------------
+# scikit-learn is a BUILD-TIME dependency of the RAG package and deliberately
+# not a runtime one. agent/rag/index.py imports it inside the one function that
+# BUILDS an index; agent/rag/retrieve.py, which is what actually answers a
+# query, imports no third-party package at all, and agent/knowledge.py guards
+# the import with a try so the service starts fine without it. That design is
+# the reason the container does not carry ~100 MB of scikit-learn and numpy to
+# serve lookups against an index that was built offline.
+#
+# The TESTS, though, build an index — that is the point of
+# tests/test_rag.py::test_build_then_load_round_trips and the search tests
+# around it — so they need the build-time dependency that production does not.
+#
+# CI had been installing requirements.txt only, which is correct for testing
+# what the image installs, and the result was 1 failure and 9 errors, every one
+# of them `ModuleNotFoundError: No module named 'sklearn'`, on every push for
+# weeks. The RAG index-building code was not being tested at all, and the red
+# check had become background noise.
+#
+# Layering rather than replacing keeps both properties true: the runtime set is
+# byte-for-byte the file the image installs, plus the test-only extra on top.
+#
+# services/agent/Dockerfile copies ONLY requirements.txt, so nothing here can
+# reach the shipped image. Keep it that way.
+
+-r requirements.txt
+
+# Build-time only. Pinned to a major line rather than exactly, matching the
+# style of requirements.txt, so security patches arrive without a bump here.
+scikit-learn>=1.4

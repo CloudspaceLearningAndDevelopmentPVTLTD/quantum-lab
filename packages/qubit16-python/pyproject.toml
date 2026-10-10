@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qubit16"
+version = "0.1.0"
+description = "Run existing Qiskit code against qubit16: IBM Quantum, IonQ and Rigetti through one credential."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "qubit16" }]
+keywords = ["quantum", "qiskit", "qpu", "ibm", "ionq", "rigetti", "braket"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+
+# requests rather than httpx: it is the dependency a scientific Python
+# environment already has, and this package should not be the reason somebody's
+# locked environment grows a new transitive tree. The HTTP surface used here is
+# small enough that the choice is reversible — everything lives in client.py.
+#
+# qiskit is a HARD dependency, not an optional one. The whole point of the
+# package is that `BackendV2`, `SparsePauliOp` and the primitive result
+# containers are the real Qiskit classes, so somebody's existing code keeps
+# working. A "qiskit-free" mode would be a different, worse package.
+dependencies = [
+  "requests>=2.28",
+  "qiskit>=1.2",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://qubit16.ai"
+Documentation = "https://qubit16.ai/docs"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# So the tests import the package from src/ without an editable install first.
+pythonpath = ["src"]

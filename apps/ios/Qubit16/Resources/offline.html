@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Offline</title>
+<style>
+  :root { --bg:#07090f; --ink:#eef2ff; --muted:#9aa6c4; --accent:#5b47d6; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f7f8fc; --ink:#101527; --muted:#48587a; } }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 -apple-system, system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
+  main { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
+    text-align: center; }
+  svg { width: 72px; height: 72px; color: var(--muted); }
+  h1 { font-size: 22px; margin: 8px 0 0; }
+  p { margin: 0; max-width: 28ch; color: var(--muted); }
+  button { margin-top: 12px; min-height: 48px; padding: 0 28px; border: 0; border-radius: 12px;
+    background: var(--accent); color: #fff; font: inherit; font-weight: 600; touch-action: manipulation; }
+  button:active { opacity: .85; }
+</style>
+</head>
+<body>
+<main>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r=".8" fill="currentColor"/><path d="M3 3l18 18"/>
+  </svg>
+  <h1>You&rsquo;re offline</h1>
+  <p>Qubit16 couldn&rsquo;t reach the internet. Pages you&rsquo;ve opened before may still work once you&rsquo;re back online.</p>
+  <button type="button" id="retry">Try again</button>
+</main>
+<script>
+  document.getElementById('retry').addEventListener('click', function () {
+    try { window.webkit.messageHandlers.retry.postMessage(1); } catch (e) { location.reload(); }
+  });
+  // Come back by itself the moment the connection returns.
+  window.addEventListener('online', function () {
+    try { window.webkit.messageHandlers.retry.postMessage(1); } catch (e) {}
+  });
+</script>
+</body>
+</html>

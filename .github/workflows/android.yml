@@ -1,0 +1,90 @@
+# Android — build the Play Store bundle on a GitHub runner.
+#
+# This Mac-free path exists because building the Trusted Web Activity needs
+# a JDK and the Android SDK, which not every contributor machine has. The job
+# runs `./gradlew :app:bundleRelease` and uploads `app-release.aab` as a
+# workflow artifact; download it from the run page and upload it to Play
+# Console → Testing/Production → Create new release.
+#
+# Signing: Play only accepts a bundle signed with the app's upload key. Store
+# that key as repository secrets and the job signs the bundle; without them it
+# still builds (unsigned, a compile check) and says so.
+#   QUBIT16_KEYSTORE_B64      base64 of the upload keystore:  base64 -i upload.keystore | pbcopy
+#   QUBIT16_KEYSTORE_PASSWORD
+#   QUBIT16_KEY_ALIAS
+#   QUBIT16_KEY_PASSWORD
+# The build script (apps/android/app/build.gradle.kts) reads QUBIT16_KEYSTORE
+# (a path) and the three values above from the environment; nothing is written
+# into the repository.
+
+name: Android
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/android/**'
+      - '.github/workflows/android.yml'
+  pull_request:
+    paths:
+      - 'apps/android/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    name: Release bundle (.aab)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Restore the upload keystore (if the secrets are set)
+        id: keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.QUBIT16_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.keystore"
+            echo "QUBIT16_KEYSTORE=$RUNNER_TEMP/upload.keystore" >> "$GITHUB_ENV"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+            echo "Signing with the upload keystore from secrets."
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::QUBIT16_KEYSTORE_B64 is not set — building an UNSIGNED bundle (compile check only; Play will not accept it)."
+          fi
+
+      - name: Build release bundle
+        env:
+          QUBIT16_KEYSTORE_PASSWORD: ${{ secrets.QUBIT16_KEYSTORE_PASSWORD }}
+          QUBIT16_KEY_ALIAS: ${{ secrets.QUBIT16_KEY_ALIAS }}
+          QUBIT16_KEY_PASSWORD: ${{ secrets.QUBIT16_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:bundleRelease
+          ls -la app/build/outputs/bundle/release/
+
+      - name: Report version and signing
+        run: |
+          echo "versionCode=$(grep -oE 'versionCode = [0-9]+' app/build.gradle.kts | grep -oE '[0-9]+')  versionName=$(grep -oE 'versionName = "[^"]+"' app/build.gradle.kts | cut -d'"' -f2)  signed=${{ steps.keystore.outputs.signed }}" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qubit16-android-${{ steps.keystore.outputs.signed == 'true' && 'signed' || 'UNSIGNED' }}-${{ github.sha }}
+          path: apps/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+          if-no-files-found: error

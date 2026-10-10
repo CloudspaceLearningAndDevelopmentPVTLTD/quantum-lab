@@ -1,0 +1,19 @@
+POST 1 — Wigner negativity
+ATTACH: assets/01-wigner-negativity-640.gif
+FIRST COMMENT: https://qubit16.ai/visualizations/wigner-function
+OPENING LINE: 58 chars (fold ~140)
+------------------------------------------------------------
+PASTE EVERYTHING BELOW THIS LINE
+------------------------------------------------------------
+
+A probability distribution is never negative. This one is.
+
+That is the Wigner function of a Schrödinger-cat state — one superposition of two coherent states — turning through a single period of its own harmonic evolution. Gold is positive. Ice is below zero. The minimum sits at −0.238, and 18.9% of the landscape's total weight is under the floor.
+
+The strip along the bottom is the part a detector can actually see: the state projected onto one quadrature. Turn the detector and the same state reads as two separate lumps at 0° and as an interference comb at 90°. Both of those are ordinary, non-negative probability distributions. The landscape they are shadows of is not — and that is the piece no classical model reproduces.
+
+Nothing here is a rendered video. Every frame recomputes W on a 320×320 grid in the browser, and the readouts are measured off the same grid.
+
+Link in the first comment. Free, no account, nothing to install.
+
+#QuantumComputing #Physics #DataVisualization #QuantumOptics

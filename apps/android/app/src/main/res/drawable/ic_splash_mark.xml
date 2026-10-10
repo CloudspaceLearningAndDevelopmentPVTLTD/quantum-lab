@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Standalone splash-screen mark: the same Bloch sphere glyph as the
+     launcher icon, sized per Android's splash-icon guidance (content within
+     a 200dp square, since core-splashscreen scales it itself). Shown
+     directly on colorBackgroundDark, so it carries its own colour rather
+     than relying on a background layer. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <path
+        android:pathData="M100,40 L100,160"
+        android:strokeColor="#EEF2FF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.55" />
+
+    <path
+        android:pathData="M48,90 C48,79.4 71.6,71 100,71 C128.4,71 152,79.4 152,90 C152,100.6 128.4,109 100,109 C71.6,109 48,100.6 48,90 Z"
+        android:strokeColor="#4EDBCA"
+        android:strokeWidth="4.5"
+        android:fillColor="#00000000" />
+
+    <path
+        android:pathData="M100,40 C128.4,40 152,62.4 152,100 C152,137.6 128.4,160 100,160 C71.6,160 48,137.6 48,100 C48,62.4 71.6,40 100,40 Z"
+        android:strokeColor="#EEF2FF"
+        android:strokeWidth="3"
+        android:strokeAlpha="0.35"
+        android:fillColor="#00000000" />
+
+    <path
+        android:pathData="M130,68 m-11,0 a11,11 0 1,1 22,0 a11,11 0 1,1 -22,0"
+        android:fillColor="#A99DFF" />
+    <path
+        android:pathData="M130,68 m-11,0 a11,11 0 1,1 22,0 a11,11 0 1,1 -22,0"
+        android:strokeColor="#EEF2FF"
+        android:strokeWidth="2"
+        android:fillColor="#00000000" />
+</vector>

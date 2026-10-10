@@ -1,0 +1,116 @@
+# XcodeGen spec for the Qubit16 iOS app.
+#
+# Why a spec and not a committed .xcodeproj: a .pbxproj is machine-written XML
+# that nobody can review and that merges badly. This file is the readable source
+# of truth; on a Mac, `xcodegen generate` writes Qubit16.xcodeproj from it in a
+# second. See docs/IOS.md. Nothing here can be built on Windows or Linux.
+name: Qubit16
+
+options:
+  bundleIdPrefix: ai.qubit16
+  # 15.0: WKDownload (file exports) needs 14.5, and iOS 15 is the floor for the
+  # modern UIKit/WebKit APIs used in WebViewController. By 2026 it covers
+  # effectively every active iPhone.
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"      # CFBundleShortVersionString — what users see
+    CURRENT_PROJECT_VERSION: "1"    # CFBundleVersion — bump on EVERY upload to App Store Connect
+    TARGETED_DEVICE_FAMILY: "1,2"   # iPhone + iPad
+    # Set your Apple Developer Team ID here, or pass DEVELOPMENT_TEAM=... to
+    # xcodebuild. Left empty on purpose: it is yours, not something to guess.
+    DEVELOPMENT_TEAM: ""
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+targets:
+  Qubit16:
+    type: application
+    platform: iOS
+    sources:
+      - path: Qubit16
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.qubit16.app
+        PRODUCT_NAME: Qubit16
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Qubit16/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Qubit16/Qubit16.entitlements
+        SWIFT_STRICT_CONCURRENCY: minimal
+    # Info.plist is generated from these properties, so there is one place to
+    # read what the app declares.
+    info:
+      path: Qubit16/Info.plist
+      properties:
+        CFBundleDisplayName: Qubit16
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        # The app only speaks HTTPS to its own origin, which is the standard
+        # exemption: answering "No" here skips the export-compliance prompt on
+        # every upload.
+        ITSAppUsesNonExemptEncryption: false
+        # See WebViewController: lets the site's service worker (offline mode) run.
+        WKAppBoundDomains:
+          - qubit16.ai
+          - www.qubit16.ai
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+          UIImageName: LaunchMark
+          UIImageRespectsSafeAreaInsets: false
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default Configuration
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # Long-press the home-screen icon. `type` is mapped to a path in
+        # AppConfig.shortcutPaths; keep them in step with the Android shortcuts
+        # (apps/android/.../res/xml/shortcuts.xml).
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: simulator
+            UIApplicationShortcutItemTitle: Circuit Simulator
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeCompose
+          - UIApplicationShortcutItemType: learn
+            UIApplicationShortcutItemTitle: Quantum Course
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeBookmark
+          - UIApplicationShortcutItemType: paths
+            UIApplicationShortcutItemTitle: Learning Paths
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeTask
+          - UIApplicationShortcutItemType: visualizations
+            UIApplicationShortcutItemTitle: Visualizations
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeLove
+    entitlements:
+      path: Qubit16/Qubit16.entitlements
+      properties:
+        # Universal Links: a shared https://qubit16.ai link opens this app.
+        # Needs apps/web/public/.well-known/apple-app-site-association to list
+        # this app's <TeamID>.ai.qubit16.app — see docs/IOS.md.
+        com.apple.developer.associated-domains:
+          - applinks:qubit16.ai
+          - applinks:www.qubit16.ai
+
+schemes:
+  Qubit16:
+    build:
+      targets:
+        Qubit16: all
+    run:
+      config: Debug
+    archive:
+      config: Release

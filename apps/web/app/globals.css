@@ -1,0 +1,609 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THEME TOKENS
+
+   Generated from lib/theme/tokens.ts — that file is the source of truth. If you
+   change a value here, change it there too (see docs/THEMING.md).
+
+   Every variable NAME below is load-bearing: SuperpositionLab and GroverLab
+   read --q-violet / --q-teal / --q-amber at runtime via getComputedStyle. Values
+   are emitted as already-resolved colours rather than light-dark(), because a
+   custom property's computed value is an unresolved token stream — getPropertyValue
+   would hand the canvas the literal string "light-dark(...)".
+
+   Dark is the default: bare :root is the dark theme, exactly as before.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: dark;
+  --bg: #07090f;
+  --surface: #0d1120;
+  --surface-2: #141a2c;
+  --surface-3: #1b2338;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.13);
+  --ink: #eef2ff;
+  --ink-secondary: #8fa3c8;
+  --ink-muted: #7d8cb0;
+  --q-violet: #a99dff;
+  --q-teal: #4edbca;
+  --q-amber: #f2a96a;
+  --q-rose: #e57969;
+  --q-sky: #6283c8;
+  --q-violet-text: #c1bbfe;
+  --q-teal-text: #8ae8da;
+  --q-amber-text: #fac294;
+  --q-rose-text: #f5a193;
+  --q-sky-text: #8faae0;
+  --q-violet-strong: #5b47d6;
+  --q-violet-hover: #6a58e2;
+  --scrollbar-thumb-hover: #2a3550;
+  --card-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 12px 40px -18px rgba(0, 0, 0, 0.75), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 20px 50px -18px rgba(0, 0, 0, 0.85), 0 0 0 1px rgb(var(--q-violet-rgb) / 0.25);
+  --glass: rgba(13, 17, 32, 0.72);
+  --bg-rgb: 7 9 15;
+  --q-violet-rgb: 169 157 255;
+  --q-teal-rgb: 78 219 202;
+  --q-amber-rgb: 242 169 106;
+  --q-rose-rgb: 229 121 105;
+  --q-sky-rgb: 98 131 200;
+}
+
+/* First-time visitor, no stored preference, and JS disabled or not yet run:
+   follow the OS. The anti-flash script (components/ui/ThemeScript.tsx) always
+   writes an explicit .dark or .light class, so this only applies pre-script /
+   no-script — which is exactly the fallback the platform guidance asks for. */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark):not(.light) {
+    color-scheme: light;
+    --bg: #f7f8fc;
+    --surface: #ffffff;
+    --surface-2: #f1f3f9;
+    --surface-3: #e4e8f2;
+    --line: rgba(15, 23, 42, 0.10);
+    --line-strong: rgba(15, 23, 42, 0.18);
+    --ink: #101527;
+    --ink-secondary: #48587a;
+    --ink-muted: #5a6883;
+    --q-violet: #5a45ad;
+    --q-teal: #007d72;
+    --q-amber: #935102;
+    --q-rose: #8e2a20;
+    --q-sky: #264382;
+    --q-violet-text: #4b3793;
+    --q-teal-text: #065f57;
+    --q-amber-text: #764002;
+    --q-rose-text: #7a221a;
+    --q-sky-text: #213a71;
+    --q-violet-strong: #5a45ad;
+    --q-violet-hover: #4b3793;
+    --scrollbar-thumb-hover: #ccd3e4;
+  --card-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.8) inset, 0 10px 30px -16px rgba(15, 23, 42, 0.35), 0 1px 3px -1px rgba(15, 23, 42, 0.18);
+  --card-shadow-hover: 0 1px 0 0 rgba(255, 255, 255, 0.9) inset, 0 18px 44px -16px rgba(15, 23, 42, 0.4), 0 0 0 1px rgb(var(--q-violet-rgb) / 0.25);
+  --glass: rgba(255, 255, 255, 0.72);
+    --bg-rgb: 247 248 252;
+    --q-violet-rgb: 90 69 173;
+    --q-teal-rgb: 0 125 114;
+    --q-amber-rgb: 147 81 2;
+    --q-rose-rgb: 142 42 32;
+    --q-sky-rgb: 38 67 130;
+  }
+}
+
+/* Explicit user choice — always wins over the media query above. */
+:root.dark {
+  color-scheme: dark;
+  --bg: #07090f;
+  --surface: #0d1120;
+  --surface-2: #141a2c;
+  --surface-3: #1b2338;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.13);
+  --ink: #eef2ff;
+  --ink-secondary: #8fa3c8;
+  --ink-muted: #7d8cb0;
+  --q-violet: #a99dff;
+  --q-teal: #4edbca;
+  --q-amber: #f2a96a;
+  --q-rose: #e57969;
+  --q-sky: #6283c8;
+  --q-violet-text: #c1bbfe;
+  --q-teal-text: #8ae8da;
+  --q-amber-text: #fac294;
+  --q-rose-text: #f5a193;
+  --q-sky-text: #8faae0;
+  --q-violet-strong: #5b47d6;
+  --q-violet-hover: #6a58e2;
+  --scrollbar-thumb-hover: #2a3550;
+  --card-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 12px 40px -18px rgba(0, 0, 0, 0.75), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 20px 50px -18px rgba(0, 0, 0, 0.85), 0 0 0 1px rgb(var(--q-violet-rgb) / 0.25);
+  --glass: rgba(13, 17, 32, 0.72);
+  --bg-rgb: 7 9 15;
+  --q-violet-rgb: 169 157 255;
+  --q-teal-rgb: 78 219 202;
+  --q-amber-rgb: 242 169 106;
+  --q-rose-rgb: 229 121 105;
+  --q-sky-rgb: 98 131 200;
+}
+
+:root.light {
+  color-scheme: light;
+  --bg: #f7f8fc;
+  --surface: #ffffff;
+  --surface-2: #f1f3f9;
+  --surface-3: #e4e8f2;
+  --line: rgba(15, 23, 42, 0.10);
+  --line-strong: rgba(15, 23, 42, 0.18);
+  --ink: #101527;
+  --ink-secondary: #48587a;
+  --ink-muted: #5a6883;
+  --q-violet: #5a45ad;
+  --q-teal: #007d72;
+  --q-amber: #935102;
+  --q-rose: #8e2a20;
+  --q-sky: #264382;
+  --q-violet-text: #4b3793;
+  --q-teal-text: #065f57;
+  --q-amber-text: #764002;
+  --q-rose-text: #7a221a;
+  --q-sky-text: #213a71;
+  --q-violet-strong: #5a45ad;
+  --q-violet-hover: #4b3793;
+  --scrollbar-thumb-hover: #ccd3e4;
+  --card-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.8) inset, 0 10px 30px -16px rgba(15, 23, 42, 0.35), 0 1px 3px -1px rgba(15, 23, 42, 0.18);
+  --card-shadow-hover: 0 1px 0 0 rgba(255, 255, 255, 0.9) inset, 0 18px 44px -16px rgba(15, 23, 42, 0.4), 0 0 0 1px rgb(var(--q-violet-rgb) / 0.25);
+  --glass: rgba(255, 255, 255, 0.72);
+  --bg-rgb: 247 248 252;
+  --q-violet-rgb: 90 69 173;
+  --q-teal-rgb: 0 125 114;
+  --q-amber-rgb: 147 81 2;
+  --q-rose-rgb: 142 42 32;
+  --q-sky-rgb: 38 67 130;
+}
+
+/* ── shadcn/ui semantic aliases ──────────────────────────────────────────
+   shadcn's primitives (components/ui/button.tsx etc.) expect this variable
+   set by name. Rather than introduce a second, competing color system,
+   these alias the token set above — defined once, not per theme block,
+   because each RHS variable already resolves correctly for whichever
+   theme (.dark/.light) is active. --primary intentionally points at
+   --q-violet-strong, not the plain --q-violet accent: that's the same
+   pairing .btn-primary already used pre-shadcn, chosen because it's dark
+   enough in both themes for white text to pass contrast (see .btn-primary
+   above / docs/THEMING.md) — not a new, unvetted choice. */
+:root {
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-2);
+  --popover-foreground: var(--ink);
+  --primary: var(--q-violet-strong);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--surface-3);
+  --accent-foreground: var(--ink);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--q-violet);
+  --radius: 0.75rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  /* Room for the fixed bottom tab bar (components/ui/MobileTabBar.tsx) so the
+     last row of every page can be scrolled clear of it. */
+  padding-bottom: var(--mobile-nav-h);
+}
+
+/* ── Mobile shell ────────────────────────────────────────────
+   --mobile-nav-h is the tab bar's height plus the home-indicator inset, and 0
+   wherever the bar is hidden (xl and up — the same breakpoint SiteNav's inline
+   bar appears at). The 1px is the bar's top border. Everything that is fixed to the bottom edge reads it. */
+:root {
+  --mobile-nav-h: calc(3.5rem + 1px + env(safe-area-inset-bottom));
+}
+@media (min-width: 1280px) {
+  :root {
+    --mobile-nav-h: 0px;
+  }
+}
+/* The embeddable widget renders no site chrome, so it must not reserve space. */
+body:has([data-ql-embed]) {
+  padding-bottom: 0;
+}
+
+html {
+  /* iOS enlarges text in landscape unless told not to. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* The grey flash on tap is a browser artefact; our own :active styles
+     replace it. */
+  -webkit-tap-highlight-color: transparent;
+}
+/* A horizontal scroller must also be the containing block for any absolutely
+   positioned descendant. Otherwise e.g. a Tailwind `sr-only` span inside a table
+   cell (position:absolute, 1px) is positioned against some ancestor OUTSIDE the
+   scroller, is not clipped by it, and widens the whole document — which on a
+   phone makes the browser zoom the entire page out. Measured on
+   /visualizations/hydrogen-atom and /electron-diffraction. In `base` so any
+   utility (`absolute`, `fixed`) on the same element still wins. */
+@layer base {
+  .overflow-x-auto,
+  .overflow-auto {
+    position: relative;
+  }
+}
+
+/* Inline code in prose — a file path, an identifier — is one unbreakable word and
+   will push a phone-width page sideways. Allow it to wrap anywhere. Code BLOCKS
+   (pre > code) are excluded: they scroll, and wrapping would corrupt them. */
+:not(pre) > code {
+  overflow-wrap: anywhere;
+}
+/* Removes the legacy 300ms double-tap-to-zoom delay on controls while keeping
+   pinch-zoom. Applied to interactive elements only — never to the page, so
+   scrolling and zooming are untouched. */
+a,
+button,
+summary,
+label,
+select,
+[role='button'],
+[role='tab'],
+[role='menuitem'] {
+  touch-action: manipulation;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Native controls (checkboxes, range sliders) pick up the brand hue in both themes. */
+html {
+  accent-color: var(--q-violet);
+}
+
+/* ── Shared component classes ─────────────────────────────── */
+
+@layer components {
+  .card {
+    @apply bg-surface border border-line rounded-card;
+    box-shadow: var(--card-shadow);
+  }
+
+  .card-hover {
+    @apply transition-[box-shadow,border-color,transform] duration-200 hover:border-line-strong;
+  }
+  .card-hover:hover {
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  /*
+   * Same lift as .card-hover, but the glow takes its colour from
+   * --card-accent-rgb (set inline per card — see FeatureCard.tsx) instead of
+   * always violet. Past the hero the site used to go flat: every card below
+   * the fold read the same regardless of which of the five accent hues its
+   * icon used. This is what makes a teal card glow teal on hover rather than
+   * violet, so the accent system actually shows up past the icon chip.
+   * Falls back to violet when the variable is unset, so nothing breaks if a
+   * caller forgets to set it.
+   */
+  .card-accent-hover {
+    --card-accent-rgb: var(--q-violet-rgb);
+    @apply transition-[box-shadow,border-color,transform] duration-200 hover:border-line-strong;
+  }
+  .card-accent-hover:hover {
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+      0 20px 50px -18px rgb(var(--card-accent-rgb) / 0.35),
+      0 0 0 1px rgb(var(--card-accent-rgb) / 0.35);
+  }
+
+  /* Glass panel: the hero's qubit sits in one. A gradient hairline border
+     (mask trick) and a blurred, translucent fill read as depth on both
+     themes without a second colour system. */
+  .glass {
+    position: relative;
+    background: var(--glass);
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: var(--card-shadow);
+  }
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgb(var(--q-violet-rgb) / 0.55), rgb(var(--q-teal-rgb) / 0.35) 50%, rgb(var(--q-violet-rgb) / 0.15));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ── Hero aurora ───────────────────────────────────────────────────────
+     The landing hero's ambient wash. Was two inline radial gradients on
+     Hero.tsx (violet 0.16 + teal 0.10) with ONE set of alphas for both
+     themes, which does not work: the light palette's hues are far darker
+     than the dark palette's (--q-violet is #5a45ad light vs #a99dff dark),
+     so an alpha tuned to glow on #07090f instead lays a heavy flat lavender
+     film over #f7f8fc, and --q-teal at 0.10 (#007d72) disappeared entirely —
+     the light hero read as one monochrome violet smear.
+
+     Three hues drawn from the fixed categorical order (violet → teal → sky,
+     skipping none), each with its own per-theme alpha, so the wash has
+     actual hue movement across the section in both themes. The alphas live
+     in custom properties rather than in the gradient so a theme override
+     only restates three numbers. */
+  .hero-aurora {
+    --aurora-1: 0.16;
+    --aurora-2: 0.13;
+    --aurora-3: 0.10;
+    background:
+      radial-gradient(ellipse 70% 55% at 28% 18%, rgb(var(--q-violet-rgb) / var(--aurora-1)) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 82% 58%, rgb(var(--q-teal-rgb) / var(--aurora-2)) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 45% at 58% 105%, rgb(var(--q-sky-rgb) / var(--aurora-3)) 0%, transparent 72%);
+  }
+
+  /* Light: the same three hues are much darker, so each is pulled back hard.
+     Teal and sky are pulled back LESS than violet in relative terms — that is
+     what stops the light hero collapsing back to monochrome. */
+  :root.light .hero-aurora,
+  :root:not(.dark):not(.light) .hero-aurora {
+    --aurora-1: 0.07;
+    --aurora-2: 0.06;
+    --aurora-3: 0.05;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not(.dark):not(.light) .hero-aurora {
+      --aurora-1: 0.07;
+      --aurora-2: 0.06;
+      --aurora-3: 0.05;
+    }
+  }
+
+  /* An explicit .dark must win over the no-class light fallback above. */
+  :root.dark .hero-aurora {
+    --aurora-1: 0.16;
+    --aurora-2: 0.13;
+    --aurora-3: 0.10;
+  }
+
+  .section-label {
+    @apply text-[11px] font-bold uppercase tracking-[0.09em] text-q-violet;
+  }
+
+  .section-title {
+    @apply text-2xl font-bold text-ink;
+  }
+
+  .section-desc {
+    @apply text-sm text-ink-secondary;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+           text-sm font-semibold transition-colors duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* Was `hover:bg-[#8d7dfa]` — a hardcoded dark-theme tint that turned the
+     button LIGHTER on hover, wrong on a light surface. --q-violet-hover is
+     derived per theme. */
+  /* A11Y (WCAG 1.4.3, audit finding 5): was `bg-q-violet` — white on the dark
+     theme's #a99dff is 3.97:1, below the 4.5:1 required for normal-size text.
+     --q-violet itself could not be darkened: it is read at runtime by
+     SuperpositionLab and GroverLab and is chart series 1, so the fix is a
+     button-only fill token. #5b47d6 dark = 6.33:1 with white (and 3.14:1
+     against --bg, so the button's own edge still clears 1.4.11); light keeps
+     #5a45ad = 8.36:1. */
+  .btn-primary {
+    @apply btn text-white;
+    background-color: var(--q-violet-strong);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--q-violet-hover);
+  }
+
+  .btn-ghost {
+    @apply btn bg-surface-2 text-ink-secondary border border-line hover:text-ink hover:border-line-strong;
+  }
+
+  .pill {
+    @apply inline-block rounded-full border border-line px-2.5 py-0.5 text-[11px] font-semibold;
+  }
+
+  /* Was `text-[#c1bbfe]` — the dark-theme violet tint, ~1.6:1 on a white
+     surface. Now the themed text variant. */
+  .code-block {
+    @apply bg-surface-3 border border-line rounded-lg p-4 font-mono text-xs
+           leading-relaxed overflow-x-auto whitespace-pre;
+    color: var(--q-violet-text);
+  }
+
+  /* Focus ring — visible for keyboard users, quiet for mouse users */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-q-violet focus-visible:ring-offset-2 focus-visible:ring-offset-bg;
+  }
+
+  /* ── Range slider (components/ui/Controls.tsx) ────────────────────────────
+     RESPONSIVE (measured): the slider used to be `h-1.5 w-full`, i.e. a 6px-tall
+     hit box. Every visualization's physics is behind one of these, and on a
+     touch screen a 6px band is not grabbable — the audit at 390x844 found the
+     θ/φ sliders on /visualizations/bloch-sphere, the noise slider on /simulator
+     and every Slider in components/viz/** in that state.
+
+     The fix separates the HIT box from the PAINTED track: the <input> is 44px
+     tall (WCAG 2.5.5 Target Size, Level AAA — and the iOS/Android guidance
+     number), pulled back into the old visual rhythm with a negative block
+     margin, while ::track keeps the 6px hairline the design uses. A future
+     editor must not put a `height` back on the input itself; set the track
+     height instead.
+
+     `touch-action: pan-y` is deliberate: without it the 44px band swallows
+     vertical swipes and the page cannot be scrolled past a stack of sliders.
+     With it, a vertical swipe scrolls and a horizontal drag moves the thumb. */
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 44px;
+    /* 44px hit box, 20px of layout: the control reads as it did before. */
+    margin-block: -12px;
+    background: transparent;
+    cursor: pointer;
+    touch-action: pan-y;
+  }
+
+  .slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--surface-3);
+  }
+
+  .slider::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--surface-3);
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 22px;
+    width: 22px;
+    border-radius: 999px;
+    background: var(--q-violet);
+    border: 2px solid var(--surface);
+    /* (22 - 6) / 2 = 8 — centres the thumb on the track. */
+    margin-top: -8px;
+  }
+
+  .slider::-moz-range-thumb {
+    height: 22px;
+    width: 22px;
+    border: 2px solid var(--surface);
+    border-radius: 999px;
+    background: var(--q-violet);
+  }
+}
+
+/* ── Hero qubit affordance ─────────────────────────────────────────────────
+   A slow pulse on the H button until the visitor's first interaction: an
+   affordance cue, not decoration. Cleared by the reduced-motion rule below
+   like every other animation. */
+@keyframes hero-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(var(--q-violet-rgb) / 0.55); }
+  60% { box-shadow: 0 0 0 10px rgb(var(--q-violet-rgb) / 0); }
+}
+/* The pulse lives on a pseudo-element, NOT on the button's own box-shadow:
+   an animated box-shadow on the element itself overrides the focus ring
+   (which is also a box-shadow), and tests/e2e/a11y.spec.ts caught exactly
+   that — a keyboard user tabbing to the H button saw no focus indicator. */
+.hero-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: hero-pulse 1.8s ease-out infinite;
+}
+
+/* ── Touch targets ──────────────────────────────────────────────────────────
+   RESPONSIVE: `.btn` is `py-2 text-sm`, which measures 36px tall — under the
+   44px minimum on a phone. Raising it unconditionally would loosen every dense
+   desktop toolbar in the app, so it is raised only where the primary input is a
+   finger. `pointer: coarse` is the query that means that; it is true on phones
+   and tablets and false for a mouse or trackpad. */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 44px;
+  }
+}
+
+/* ── Scrollbars ───────────────────────────────────────────── */
+
+/* Standard property first; it inherits the themed tokens automatically.
+   Not transitioned — animating scrollbar-color flickers in WebKit. */
+html {
+  scrollbar-color: var(--surface-3) var(--surface);
+}
+
+/* Legacy WebKit fallback, only where the standard property is unsupported, so
+   the two mechanisms cannot fight. The custom properties cascade in unchanged. */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: 6px;
+    border: 2px solid var(--surface);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+}
+
+/* ── Motion preferences ───────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Store apps: no purchase entry points (see lib/app-shell.ts) ──────────────
+   Play and the App Store refuse outside checkout for digital subscriptions, so
+   inside the apps every link to /pricing and anything tagged data-store-hide is
+   removed; data-store-only content appears in its place. */
+html[data-store-app] a[href="/pricing"],
+html[data-store-app] a[href^="/pricing?"],
+html[data-store-app] a[href^="/pricing#"],
+html[data-store-app] a[href^="https://qubit16.ai/pricing"],
+html[data-store-app] [data-store-hide] {
+  display: none !important;
+}
+[data-store-only] {
+  display: none !important;
+}
+html[data-store-app] [data-store-only] {
+  display: revert !important;
+}

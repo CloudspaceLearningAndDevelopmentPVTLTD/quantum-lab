@@ -1,0 +1,19 @@
+POST 2 — Hydrogen orbitals
+ATTACH: assets/02-hydrogen-orbitals-640.gif
+FIRST COMMENT: https://qubit16.ai/visualizations/wavefunctions-3d
+OPENING LINE: 59 chars (fold ~140)
+------------------------------------------------------------
+PASTE EVERYTHING BELOW THIS LINE
+------------------------------------------------------------
+
+An electron in a hydrogen atom does not go around anything.
+
+Half a million points sampled from |ψ|² for four exact orbitals — 2p_z, 3p_z, 3d_xy, 4f_z³. Gold where ψ is positive, ice where ψ is negative, and the sign is the half that |ψ|² throws away and chemistry then spends its whole career on.
+
+Watch 3p_z, the second one. There is a small pair of lobes sitting inside a large pair, and the colours are swapped. That is a radial node: a sphere where the wavefunction passes through zero, so the electron is never found there — not because it crosses quickly, but because the amplitude is exactly nothing.
+
+The mean-radius readout is computed from the points on screen, and it lands on 5.0, 12.5, 10.5 and 18.0 Bohr radii. That is ½(3n² − l(l+1)) — the textbook result, recovered by counting dots.
+
+Link in the first comment. Free, no account, nothing to install.
+
+#Quantum #Chemistry #Physics #ScientificVisualization

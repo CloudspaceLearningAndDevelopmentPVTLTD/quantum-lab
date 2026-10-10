@@ -1,0 +1,218 @@
+-- ============================================================
+-- Quantum Lab — runtime session ownership (closes gap 3.4)
+--
+-- Run this in the Supabase SQL editor AFTER schema.sql. Like every
+-- other add-on file here it is OPTIONAL in the sense that the app
+-- boots without it: with no table (or no SUPABASE_SERVICE_ROLE_KEY)
+-- apps/web/lib/hardware/sessionStore.ts cannot answer "whose session
+-- is this?", and the close path treats that unknown as PERMISSION TO
+-- CLOSE rather than as a refusal. Read the long comment on
+-- `authorizeSessionClose` in that file before deciding that is a bug:
+-- refusing to close a session leaves a QPU reserved and billing.
+--
+-- ── WHAT A ROW IS, AND WHAT IT IS NOT ────────────────────────
+--
+-- One row per IBM Runtime session this platform opened on an
+-- account's behalf. It exists for exactly one question — "did this
+-- account open this session?" — which `DELETE /api/hardware/session/
+-- {id}` could not previously ask at all. docs/COMPETITIVE-GAPS.md
+-- §3.4 names the gap.
+--
+-- It is an OWNERSHIP record, not a LIVENESS record, and the
+-- difference is load-bearing:
+--
+--   * `closed_at` is stamped when WE asked IBM to close the session,
+--     not when IBM's meter actually stopped. The two are close but
+--     they are not the same instant and this column must never be
+--     presented as billed time.
+--   * Nothing reaps rows. A session that hits `max_time_seconds` and
+--     is torn down by IBM still reads `closed_at is null` here
+--     forever, because nothing on this platform ever observes that
+--     expiry — sessions are asynchronous at the vendor and nothing
+--     calls us back. So `closed_at is null` means "we never closed
+--     it", NOT "it is open". Do not build a dashboard that says
+--     "open sessions" off this column without saying which of the
+--     two it means.
+--   * `max_time_seconds` is what we REQUESTED. IBM may grant less.
+--     We never learn what it granted, so this is a stated intent.
+--     It is NULLABLE, and null means "we could not store the number
+--     honestly" — never "zero" and never "unbounded". See the column.
+--
+-- ── THE ASSUMPTION THIS TABLE RESTS ON ───────────────────────
+--
+-- session_id is the primary key, so one id must mean one session
+-- and therefore one owner. The VENDOR does not guarantee that.
+-- qiskit_ibm_runtime's `Session.session_id` is `str | None` (None
+-- for a simulator backend and for the local runtime service) and
+-- services/api/app/quantum/hardware.py stringifies it, so the id
+-- that reaches us can be the literal text 'None'. Every account
+-- that opened such a session would claim the SAME primary key:
+-- the first write wins and every other owner's close would be
+-- positively identified as another account's and REFUSED — the one
+-- outcome the close policy exists to prevent.
+-- apps/web/lib/hardware/sessionStore.ts refuses to record or look
+-- up 'none'/'null'/'undefined' for that reason, which keeps those
+-- sessions on the unrecorded-but-closable branch. That is a guard
+-- in the application, NOT a constraint here: the database cannot
+-- tell a placeholder from an id. The real fix is upstream.
+--
+-- ############################################################
+-- #  THIS TABLE IS WRITTEN ONLY BY THE SERVICE ROLE.         #
+-- #                                                          #
+-- #  RLS is enabled and NO POLICY IS CREATED — with RLS on   #
+-- #  and no policy the anon and authenticated roles can do   #
+-- #  nothing, and the service role (which bypasses RLS) is   #
+-- #  the only path in. Opening and closing both go through   #
+-- #  /api/hardware/session, which verifies the caller and    #
+-- #  filters on user_id server-side, so the effective policy #
+-- #  is owner-only. Same construction as                     #
+-- #  public.webhook_endpoints in schema-integrations.sql.    #
+-- #                                                          #
+-- #  Do not "fix" the missing policies with a permissive     #
+-- #  one. An authenticated SELECT scoped by auth.uid() would #
+-- #  in fact be harmless for these columns — there is no     #
+-- #  secret here — but a permissive INSERT or UPDATE would   #
+-- #  not be: a user who can insert a row claiming a session  #
+-- #  id can claim somebody else's session, and a user who    #
+-- #  can UPDATE can un-close their own row. The whole value  #
+-- #  of the table is that the ownership claim is written by  #
+-- #  the server that watched the session being opened.       #
+-- ############################################################
+--
+-- HONESTY NOTE, same as schema-integrations.sql and the rest: this
+-- file has never been run against a live Supabase project. The
+-- column names match what apps/web/lib/hardware/sessionStore.ts
+-- reads and writes, and that mapping is covered by tests against an
+-- in-memory double, but the SQL itself is unverified. Check it
+-- before trusting it.
+-- ============================================================
+
+-- ── Runtime sessions ─────────────────────────────────────────
+create table if not exists public.runtime_sessions (
+  -- The VENDOR's session id, used as the primary key rather than a
+  -- surrogate uuid. Two reasons: it is the only identifier the close
+  -- route is given, so a surrogate key would mean an extra lookup on
+  -- the one path that must stay cheap; and a primary key is exactly
+  -- the constraint we want — recording the same session twice is a
+  -- bug (it would mean two accounts claiming one device) and should
+  -- fail rather than produce two rows that disagree about the owner.
+  --
+  -- REJECTED: a composite key of (provider, session_id). Only IBM has
+  -- sessions today, and a bare session_id is unambiguous because of
+  -- that, not because vendor id spaces are globally unique. If a
+  -- second vendor ever grows sessions, add a `provider` column and
+  -- move the key — do not assume the ids cannot collide.
+  session_id       text primary key check (char_length(session_id) between 1 and 128),
+
+  -- The Supabase auth.users id of the account that opened it. This
+  -- is the column the entire table exists for.
+  --
+  -- `on delete cascade` matches every other table in this schema, and
+  -- has a consequence worth stating: deleting an account erases the
+  -- ownership record of any session it left open, after which the
+  -- close path can no longer identify an owner and falls back to its
+  -- unverified-but-allowed branch. That is the right direction (a
+  -- deleted account's session must still be closable) but it is a
+  -- silent loss of an audit trail, not a no-op.
+  user_id          uuid not null references auth.users (id) on delete cascade,
+
+  -- Which device was reserved. Recorded for the operator's benefit —
+  -- "which QPU did this account hold, and for how long?" is the
+  -- question an unexpected invoice asks — and never used to authorise
+  -- anything.
+  backend          text not null check (char_length(backend) <= 128),
+
+  -- The ceiling we ASKED IBM for, in seconds. The route bounds this
+  -- to [60, 28800] before it ever reaches here; the check constraint
+  -- restates the bound so a future caller that skips the route cannot
+  -- record an eight-day session. See the header on why this is an
+  -- intent and not a measurement.
+  --
+  -- NULLABLE, deliberately, and this is the one place this file does
+  -- NOT follow schema-integrations.sql. Every other column here is
+  -- either the ownership fact itself or not-null-with-a-default; this
+  -- one is decoration — nothing authorises anything from it. If it
+  -- were `not null` with the range check, a caller that somehow
+  -- reported a window outside [60, 28800] (or a NaN) would have its
+  -- INSERT rejected outright, and the row we would lose is the
+  -- OWNERSHIP row, which silently reopens §3.4 for that session. A
+  -- decorative column must never be able to veto the security record,
+  -- so sessionStore.ts writes null there instead and logs it.
+  --
+  -- REJECTED: keeping `not null` and having the application clamp the
+  -- value into range. It also saves the row, but it writes a number
+  -- nobody requested into a column whose entire documented meaning is
+  -- "what we requested" — and an operator reading 28800 while
+  -- reconciling an invoice would have no way to know it was invented.
+  -- Null says "we do not know", which is true.
+  --
+  -- The check needs no `max_time_seconds is null or ...` arm: a CHECK
+  -- passes unless it evaluates to FALSE, and `null between 60 and
+  -- 28800` is NULL. Stated because that is exactly the SQL rule a
+  -- reader is most likely to "fix" by adding a redundant arm.
+  max_time_seconds integer check (max_time_seconds between 60 and 28800),
+
+  -- When WE recorded it, which is shortly after IBM opened it. The
+  -- vendor's own open instant is not returned to us.
+  opened_at        timestamptz not null default now(),
+
+  -- When WE asked IBM to close it. Null means we never did — see the
+  -- header: that is not the same as "still open".
+  closed_at        timestamptz
+);
+
+comment on table public.runtime_sessions is
+  'Ownership records for IBM Runtime sessions, so the close route can refuse a session that demonstrably belongs to another account. Not a liveness record: closed_at is when we asked to close, and nothing reaps sessions that expired at the vendor.';
+
+-- The operator read path: one account's sessions, newest first
+-- ("what did this account hold this month?"). The ownership lookup
+-- itself goes through the primary key and needs no index.
+create index if not exists runtime_sessions_user_opened_idx
+  on public.runtime_sessions (user_id, opened_at desc);
+
+-- The "what did we never close?" sweep. Partial, because on a healthy
+-- deployment almost every row is closed and a full index would be
+-- mostly dead weight for a query that is run by a human, occasionally.
+create index if not exists runtime_sessions_unclosed_idx
+  on public.runtime_sessions (opened_at desc) where closed_at is null;
+
+alter table public.runtime_sessions enable row level security;
+-- NO POLICIES — deliberate. See the banner above.
+
+-- ── Verification queries (run by hand; nothing calls these) ──
+--
+-- 1. Sessions we opened and never closed, oldest first. Each one is
+--    EITHER a leak (still reserved, still billing) OR — far more
+--    likely — a session that hit max_time_seconds and was torn down
+--    by IBM without us noticing. This query cannot tell you which,
+--    and neither can this schema; check the vendor console.
+--
+--      select session_id, user_id, backend, max_time_seconds, opened_at
+--        from public.runtime_sessions
+--       where closed_at is null
+--       order by opened_at;
+--
+-- 2. Rows whose requested window has certainly elapsed — the subset
+--    of query 1 that is almost certainly NOT a live leak.
+--
+--    Rows with a NULL max_time_seconds are EXCLUDED, because the
+--    comparison is null for them and we genuinely cannot say whether
+--    their window elapsed. They stay in query 1, where they belong.
+--
+--      select session_id, opened_at,
+--             opened_at + make_interval(secs => max_time_seconds) as expires_by
+--        from public.runtime_sessions
+--       where closed_at is null
+--         and opened_at + make_interval(secs => max_time_seconds) < now()
+--       order by opened_at;
+--
+-- 3. How long each session was held, per account. This is HELD time,
+--    not BILLED time — IBM bills for QPU seconds inside the window,
+--    not for the window — so do not reconcile an invoice against it.
+--
+--      select user_id, backend, session_id,
+--             closed_at - opened_at as held
+--        from public.runtime_sessions
+--       where closed_at is not null
+--       order by held desc
+--       limit 50;

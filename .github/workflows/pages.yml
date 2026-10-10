@@ -1,0 +1,87 @@
+# Engineering documentation → Cloudflare Pages.
+#
+# Builds the MkDocs site in website/ (config: mkdocs.yml at the repo root) with
+# --strict, then uploads the built site/ to the Cloudflare Pages project
+# `qubit16-docs` with Wrangler. Cloudflare Pages rather than GitHub Pages so
+# the docs sit on docs.qubit16.ai next to the product, behind the same
+# Cloudflare zone, with the same caching and TLS settings.
+#
+# ONE-TIME SETUP (repository Settings → Secrets and variables → Actions):
+#   secret   CLOUDFLARE_API_TOKEN   — a token with the "Cloudflare Pages — Edit"
+#                                     permission (Cloudflare → My Profile → API
+#                                     Tokens → Create Token → "Edit Cloudflare
+#                                     Workers" template works, or a custom token
+#                                     with Account · Cloudflare Pages · Edit)
+#   variable CLOUDFLARE_ACCOUNT_ID  — the 32-hex account id from the dashboard URL
+# The first run creates the Pages project. Then, in Cloudflare → Workers &
+# Pages → qubit16-docs → Custom domains, add docs.qubit16.ai (the zone is on
+# Cloudflare, so the DNS record is created for you).
+
+name: Docs site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-site
+  cancel-in-progress: true
+
+env:
+  PAGES_PROJECT: qubit16-docs
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: website/requirements.txt
+
+      - name: Install MkDocs
+        run: pip install -r website/requirements.txt
+
+      - name: Build (strict — a broken link fails the build)
+        run: mkdocs build --strict
+
+      - name: Check Cloudflare credentials are configured
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Set the CLOUDFLARE_API_TOKEN secret and the CLOUDFLARE_ACCOUNT_ID variable (see the header of this workflow). The site built; only the upload is skipped."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Create the Pages project if it does not exist yet
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@3 pages project create "$PAGES_PROJECT" --production-branch=main \
+            || echo "project exists (or creation was refused) — continuing to deploy"
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ env.PAGES_PROJECT }} --branch=main --commit-dirty=true

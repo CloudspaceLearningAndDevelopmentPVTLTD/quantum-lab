@@ -1,0 +1,158 @@
+# Quantum Lab — full local stack (Compose v2, no `version:` key needed).
+#
+#   cp .env.example .env
+#   docker compose up --build
+#
+# Every variable in .env.example is optional, so an untouched copy works: the
+# stack comes up with the offline tutor and the local Aer simulator, and no
+# cloud credentials.
+#
+# NOT VERIFIED BY EXECUTION: `docker compose up` has not been run with this file
+# (the images themselves are built in Azure from the same Dockerfiles). It
+# is verified by reading: every referenced Dockerfile exists, every path it
+# COPYs exists in its build context, and the one line that provably broke the
+# web build (a COPY of an apps/web/node_modules that npm never creates) is
+# fixed. Treat the first run on a real daemon as the actual proof.
+
+services:
+  # The build context is the REPO ROOT, not ./apps/web. apps/web is an npm
+  # workspace: the lockfile lives at the root and `npm ci` cannot run without
+  # it, so the Dockerfile has to be able to see the root package.json and
+  # package-lock.json. See the header of apps/web/Dockerfile.
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      # BUILD ARGS, NOT `environment:`. Every NEXT_PUBLIC_* value is inlined
+      # into the compiled output by the Next compiler — in server code as much
+      # as client code — so it is frozen at build time. Setting these under
+      # `environment:` below would look right and do nothing; that is exactly
+      # what this file used to do with NEXT_PUBLIC_API_URL.
+      #
+      # http://api:8000 is the compose network name. The browser never calls it
+      # directly: the hardware page goes same-origin through the Next server's
+      # proxy (apps/web/lib/hardware/proxy.ts), and only that server-side hop
+      # resolves `api`. The value also appears in the hardware page's "could not
+      # reach it" message, so on a failure you will see the container hostname
+      # rather than localhost. That is accurate, if briefly surprising.
+      #
+      # Change one of these and you must rebuild: `docker compose up --build`.
+      args:
+        NEXT_PUBLIC_API_URL: http://api:8000
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+        NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+    ports:
+      - "3000:3000"
+    # Run-time only: server-side reads, never inlined, never sent to a browser.
+    environment:
+      AGENT_SERVICE_URL: http://agent:8001
+      # Tier 2 (direct model call, no agent service) — same cheapest-first
+      # order as the agent service above, via the open-source Vercel AI SDK.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TUTOR_MODEL: ${TUTOR_MODEL:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_PRO_MONTHLY: ${STRIPE_PRICE_PRO_MONTHLY:-}
+      STRIPE_PRICE_PRO_YEARLY: ${STRIPE_PRICE_PRO_YEARLY:-}
+      STRIPE_PRICE_TEAM_MONTHLY: ${STRIPE_PRICE_TEAM_MONTHLY:-}
+      STRIPE_PRICE_TEAM_YEARLY: ${STRIPE_PRICE_TEAM_YEARLY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      ANALYTICS_SUPABASE_TABLE: ${ANALYTICS_SUPABASE_TABLE:-}
+      # Presented upstream as X-Quantum-Lab-Secret. Deliberately fed from
+      # API_SHARED_SECRET, not from QUANTUM_API_SECRET: under Compose you set
+      # ONE variable in .env and both sides get it. Two names that must match by
+      # hand is a 401 waiting to happen. (The Next app reads QUANTUM_API_SECRET
+      # first and accepts API_SHARED_SECRET as an alias, so either works — but
+      # set only API_SHARED_SECRET here.)
+      QUANTUM_API_SECRET: ${API_SHARED_SECRET:-}
+    depends_on:
+      # service_healthy, not a bare name: a bare dependency only waits for the
+      # container to be created, so the web app used to start while the API was
+      # still importing qiskit. Both Python images now define a HEALTHCHECK,
+      # which is what makes this condition meaningful.
+      api:
+        condition: service_healthy
+      agent:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api:
+    build: ./services/api
+    ports:
+      # PUBLISHED TO THE HOST ONLY BY CONVENTION. This service is
+      # unauthenticated unless API_SHARED_SECRET is set, and it executes
+      # user-supplied circuits and can spend IBM/Braket credits. On any machine
+      # reachable from outside, delete this ports block — `web` reaches it over
+      # the compose network without it — or set API_SHARED_SECRET.
+      - "127.0.0.1:8000:8000"
+    environment:
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      API_SHARED_SECRET: ${API_SHARED_SECRET:-}
+      IBM_QUANTUM_TOKEN: ${IBM_QUANTUM_TOKEN:-}
+      DEFAULT_BACKEND: ${DEFAULT_BACKEND:-aer_simulator}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      AZURE_QUANTUM_RESOURCE_ID: ${AZURE_QUANTUM_RESOURCE_ID:-}
+      AZURE_QUANTUM_LOCATION: ${AZURE_QUANTUM_LOCATION:-eastus}
+      # Unset by default: the job store falls back to an in-process dict. See
+      # the redis service at the bottom before setting this.
+      REDIS_URL: ${REDIS_URL:-}
+    restart: unless-stopped
+
+  agent:
+    build: ./services/agent
+    ports:
+      - "127.0.0.1:8001:8001"
+    environment:
+      # Cheapest-first: GEMINI_API_KEY (free tier) > GROQ_API_KEY > ANTHROPIC_API_KEY.
+      # Goes through LiteLLM (langchain-litellm, an open-source gateway) — see
+      # docs/LLM-GATEWAY.md — so this is a config change, not three integrations.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      MODEL: ${MODEL:-gemini/gemini-2.5-flash}
+      QUANTUM_API_URL: http://api:8000
+      # The agent service reads the same CORS variable as the API now (audit
+      # finding CORS-1); it used to hard-code http://localhost:3000. A `*` here
+      # makes the service refuse to start — see docs/SECURITY.md.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # OPTIONAL — the shared job store.
+  #
+  # Not started by default: it is in the `queue` profile, so plain
+  # `docker compose up` skips it entirely. Bring it up with
+  #
+  #     docker compose --profile queue up
+  #
+  # and set REDIS_URL=redis://redis:6379 in .env for the api service to use it.
+  #
+  # What it changes: services/api/app/jobs/store.py picks a Redis-backed store
+  # when REDIS_URL is set and a ping succeeds, otherwise a bounded in-process
+  # dict. The dict loses every job on restart and is invisible to other
+  # replicas, so a poll can land on an instance that has never heard of the
+  # job. With one replica on one box that is fine, which is why this is off.
+  # See docs/ARCHITECTURE.md § "Where the job queue goes".
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    profiles: ["queue"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped

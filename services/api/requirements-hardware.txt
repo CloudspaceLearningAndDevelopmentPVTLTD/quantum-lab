@@ -1,0 +1,59 @@
+# Vendor SDKs for real quantum hardware.
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# These three lines used to sit commented out at the bottom of
+# requirements.txt under an "OPTIONAL EXTRAS" heading. The reasoning was
+# sound for a simulator — every import is lazy, every one degrades to
+# "unavailable" — but it had a consequence nobody had written down: the
+# Dockerfile installs requirements.txt, so the image that gets deployed
+# could not submit to real hardware AT ALL. Not "unavailable until you set
+# a token"; unavailable with a token, a funded account and a working
+# device, because `import qiskit_ibm_runtime` raised ModuleNotFoundError
+# inside `_require_ibm()` and the route answered 503.
+#
+# That is why docs/HARDWARE.md could say the Azure path had "never been run
+# against a live workspace" and be describing all three providers. There was
+# no deployed environment in which any of them COULD run.
+#
+# So: a separate file, installed by default (see the INCLUDE_HARDWARE_SDKS
+# build arg in the Dockerfile), that an operator running a simulator-only
+# deployment can switch off to save roughly 120 MB of image. The default is
+# the direction that works; the opt-out is for the smaller case.
+#
+# Everything here is still imported lazily by app/quantum/hardware.py and
+# app/quantum/azure.py, so installing these does NOT make the service
+# require credentials. With no token set, a device stays listed as
+# unavailable with the reason attached, exactly as before.
+
+# Real IBM Quantum hardware. Needs IBM_QUANTUM_TOKEN, and on a multi-instance
+# account IBM_QUANTUM_INSTANCE (the CRN) — see app/core/config.py.
+# >=0.40 for the ibm_quantum_platform channel; the legacy ibm_quantum channel
+# it replaced was retired in 2025 and a token alone no longer addresses a job.
+qiskit-ibm-runtime>=0.40
+
+# IonQ and Rigetti via Amazon Braket. Needs AWS credentials and
+# BRAKET_S3_BUCKET.
+amazon-braket-sdk>=1.90
+
+# Quantinuum and IonQ via Azure Quantum. Needs AZURE_QUANTUM_RESOURCE_ID and
+# AZURE_QUANTUM_LOCATION.
+azure-quantum>=2.0
+
+# Service-principal authentication, for BYOK on Azure (docs/BYOK.md §4).
+#
+# DECLARED, NOT NEWLY ADDED. azure-quantum already depends on this
+# (`azure-identity<2.0,>=1.25.3` as of azure-quantum 3.12), so it has been in
+# the image all along and the Azure BYOK path was never actually broken by its
+# absence. The reason to name it here anyway is that
+# app/quantum/azure.py imports `azure.identity.ClientSecretCredential`
+# DIRECTLY. A package you import directly belongs in your requirements: relying
+# on it arriving through somebody else's dependency means the day azure-quantum
+# drops it, vendors it, or moves it behind an extra, this service breaks with a
+# ModuleNotFoundError inside a credential path — which is the least convenient
+# place to discover a packaging assumption.
+#
+# The operator path does NOT need this: with no BYOK credential the SDK builds
+# its own DefaultAzureCredential internally. Only a user-supplied service
+# principal reaches the direct import.
+azure-identity>=1.17

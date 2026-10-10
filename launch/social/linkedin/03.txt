@@ -1,0 +1,29 @@
+POST 3 — Ten AI tools for quantum developers
+ATTACH: assets/03-workbench-rail-800.gif
+FIRST COMMENT: https://qubit16.ai/workbench  |  https://claude.ai/artifact/RsdACE3v1AymniE6dRkGiZ
+OPENING LINE: 89 chars (fold ~140)
+------------------------------------------------------------
+PASTE EVERYTHING BELOW THIS LINE
+------------------------------------------------------------
+
+We shipped ten AI tools for quantum developers, and not one of them teaches you anything.
+
+That is deliberate. The visualizations on Qubit16 exist to be learned from. The workbench exists to hand you a result you can keep, and it runs the same from-scratch statevector simulator everything else on the site runs on.
+
+Generate — Verified circuit generation: you write a spec (target histogram, state or unitary, plus gate-set and depth limits), the model proposes OpenQASM, an exact checker rejects it, and the rejection goes back in. Every failed attempt stays on the record. Alongside it, an evolutionary loop that scores MaxCut heuristics against the simulator and keeps the lineage of every survivor.
+
+Train — Decoder Lab: a lookup table, an MLP and a transformer you train in your own browser, racing exact MWPM at distance 3, 5 and 7. That is AlphaQubit (Nature, 2024) at a scale you can actually watch. And a calibration agent holding a drifting X gate above 99.5% fidelity from measurement counts alone.
+
+Optimise — Routing Race: your circuit mapped onto a real coupling map twice, by SABRE and by an eight-weight REINFORCE swap policy, with two-qubit count, depth and added SWAPs side by side. IBM reported 24% and 36% over the default heuristic on 100+ qubit circuits; this is that idea at 8–12 qubits.
+
+Run — an experiment runner your agent writes into over MCP, a CPU-vs-GPU statevector benchmark, and thirteen landmark papers from 1969 to 2024 executed live and checked against the number each one published.
+
+Measure — zero-noise extrapolation and readout mitigation with error bars, and a QML reality check that prints a variational classifier's held-out accuracy next to a tuned logistic regression's, with the training cost of each.
+
+That last one is the tool I would start with. It is the one most likely to talk you out of something.
+
+All of it runs in the browser. No key, no account, no Python.
+
+Link in the first comment. Free, no account, nothing to install.
+
+#QuantumComputing #AI #MachineLearning #DeveloperTools

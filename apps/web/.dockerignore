@@ -1,0 +1,64 @@
+# apps/web/.dockerignore
+#
+# NOTE ON SCOPE: the web image is built from the REPO ROOT
+# (`docker build -f apps/web/Dockerfile .`) because apps/web is an npm
+# workspace and needs the root package.json + package-lock.json. In that case
+# Docker reads /.dockerignore, not this file. This file still matters for:
+#   * tools that build with apps/web as the context,
+#   * anyone who runs `docker build ./apps/web` by habit,
+#   * BuildKit's per-Dockerfile ignore lookup (apps/web/Dockerfile.dockerignore
+#     conventions in some CI images),
+# so it is kept in sync with the root one on purpose. Belt and braces.
+#
+# SECURITY, not optimisation: the .env rules below exist because a file copied
+# into the build context can be baked into an image layer, and image layers are
+# permanently readable via `docker history` / `docker save` even if a later
+# layer deletes the file. A published image containing a real .env is a
+# credential-disclosure incident. Secrets are supplied at run time only.
+
+# --- Dependencies -----------------------------------------------------------
+node_modules
+.npm
+
+# --- Build output -----------------------------------------------------------
+.next
+out
+dist
+build
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Python leftovers (if anyone vendors a venv here) -----------------------
+.venv
+venv
+__pycache__
+*.py[cod]
+
+# --- SECURITY: never ship environment files (see header) --------------------
+.env
+.env.*
+!.env.example
+
+# --- VCS / CI / editor ------------------------------------------------------
+.git
+.gitignore
+.github
+.vscode
+.idea
+.DS_Store
+
+# --- Tests, reports, logs ---------------------------------------------------
+tests
+test-results
+playwright-report
+playwright.config.ts
+vitest.config.ts
+coverage
+*.log
+
+# --- Docs and prose ---------------------------------------------------------
+docs
+*.md
+
+# --- Other deploy targets ---------------------------------------------------
+.vercel

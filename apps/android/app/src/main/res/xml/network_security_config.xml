@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No cleartext traffic, anywhere, ever. The site is HTTPS-only already
+     (see docs/SECURITY.md); this just makes the app refuse to downgrade even
+     if a captive portal or misconfigured link ever tried http://. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

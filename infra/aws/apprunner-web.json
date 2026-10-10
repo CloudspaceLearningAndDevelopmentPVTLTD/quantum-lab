@@ -1,0 +1,36 @@
+{
+  "ServiceName": "quantum-lab-web",
+  "SourceConfiguration": {
+    "AuthenticationConfiguration": {
+      "AccessRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/quantum-lab-apprunner-ecr-access"
+    },
+    "AutoDeploymentsEnabled": false,
+    "ImageRepository": {
+      "ImageIdentifier": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/quantum-lab/web:<TAG>",
+      "ImageRepositoryType": "ECR",
+      "ImageConfiguration": {
+        "Port": "3000",
+        "RuntimeEnvironmentVariables": {
+          "AGENT_SERVICE_URL": "<AGENT_SERVICE_URL_https://xxxx.region.awsapprunner.com>"
+        },
+        "RuntimeEnvironmentSecrets": {
+          "QUANTUM_API_SECRET": "arn:aws:ssm:<REGION>:<ACCOUNT_ID>:parameter/quantum-lab/api-shared-secret"
+        }
+      }
+    }
+  },
+  "InstanceConfiguration": {
+    "Cpu": "0.25 vCPU",
+    "Memory": "1 GB",
+    "InstanceRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/quantum-lab-apprunner-instance"
+  },
+  "HealthCheckConfiguration": {
+    "Protocol": "HTTP",
+    "Path": "/api/health",
+    "Interval": 10,
+    "Timeout": 5,
+    "HealthyThreshold": 1,
+    "UnhealthyThreshold": 5
+  },
+  "AutoScalingConfigurationArn": "<WEB_AUTOSCALING_CONFIG_ARN>"
+}

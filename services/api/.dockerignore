@@ -1,0 +1,32 @@
+# services/api/.dockerignore
+#
+# The root .dockerignore does NOT apply to this image. Docker reads
+# <context>/.dockerignore, and this service is built with `build: ./services/api`
+# (compose) or `docker build ./services/api`, so the context root is this
+# directory. Without this file the build context included services/api/.venv —
+# a host-built virtualenv of several hundred megabytes, wrong architecture,
+# uploaded to the daemon on every build.
+#
+# SECURITY, not tidiness: the .env rules exist because anything in the build
+# context can be baked into a layer, and layers stay readable through
+# `docker history` and `docker save` even if a later layer deletes the file.
+# Secrets are injected at run time only.
+
+.venv
+venv
+__pycache__
+**/__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+
+.env
+.env.*
+!.env.example
+
+tests
+docs
+*.md
+railway.json
+Dockerfile
+.dockerignore

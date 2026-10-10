@@ -1,0 +1,43 @@
+# iOS — build the shell on a macOS runner.
+#
+# Runs on GitHub Actions (first green run 2026-10-05); the Swift it builds also
+# compiles in Xcode and runs in the iOS Simulator. See docs/IOS.md §6.
+#
+# Unsigned simulator build only: it proves the project generates and compiles, and
+# needs no Apple account or secrets. Shipping to the App Store is manual (docs/IOS.md §3).
+
+name: iOS
+
+on:
+  push:
+    paths: ['apps/ios/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['apps/ios/**', '.github/workflows/ios.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: iOS — generate project and build
+    runs-on: macos-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate the Xcode project from project.yml
+        run: xcodegen generate
+      - name: Build for the iOS Simulator (unsigned)
+        run: |
+          xcodebuild \
+            -project Qubit16.xcodeproj \
+            -scheme Qubit16 \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

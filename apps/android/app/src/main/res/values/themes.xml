@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!--
+      Theme.SplashScreen (AndroidX core-splashscreen) gives the Android 12+
+      native splash API on every supported OS version back to minSdk, themed
+      from the exact same colours as manifest.webmanifest's background_color
+      / theme_color. windowSplashScreenAnimatedIcon is the same qubit glyph
+      as the adaptive launcher icon's foreground layer.
+    -->
+    <style name="Theme.Qubit16.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/colorBackgroundDark</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_mark</item>
+        <item name="windowSplashScreenIconBackgroundColor" tools:targetApi="31">@color/colorBackgroundDark</item>
+        <item name="postSplashScreenTheme">@style/Theme.Qubit16</item>
+    </style>
+
+    <style name="Theme.Qubit16" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccentTeal</item>
+        <item name="android:windowBackground">@color/colorBackgroundDark</item>
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarColor">@color/colorBackgroundDark</item>
+    </style>
+</resources>

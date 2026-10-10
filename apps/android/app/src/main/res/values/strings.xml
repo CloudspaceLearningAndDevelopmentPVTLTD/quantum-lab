@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Qubit16</string>
+    <string name="hostName" translatable="false">qubit16.ai</string>
+    <string name="widget_label">Quantum Tip</string>
+    <string name="widget_preview_body">A new idea from the glossary, every day.</string>
+    <string name="widget_open_cta">Open glossary</string>
+
+    <string name="shortcut_simulator_short">Simulator</string>
+    <string name="shortcut_simulator_long">Circuit Simulator</string>
+    <string name="shortcut_learn_short">Course</string>
+    <string name="shortcut_learn_long">Quantum Course</string>
+    <string name="shortcut_paths_short">Paths</string>
+    <string name="shortcut_paths_long">Learning Paths</string>
+    <string name="shortcut_viz_short">Visualize</string>
+    <string name="shortcut_viz_long">Visualizations</string>
+
+    <!--
+      Digital Asset Links statement, pre-declared for instant trust on first
+      launch (androidbrowserhelper falls back to a live fetch of
+      https://qubit16.ai/.well-known/assetlinks.json if this ever disagrees
+      with it, so being briefly out of date fails safe rather than breaking
+      the app).
+
+      package_name and the sha256_cert_fingerprints entry below MUST equal
+      apps/web/public/.well-known/assetlinks.json exactly — see
+      docs/ANDROID.md "Digital Asset Links" for how the fingerprint is
+      produced and why there are two entries (debug key for local testing,
+      release key for what Play actually ships).
+    -->
+    <string name="asset_statements" translatable="false">
+        [{
+          \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+          \"target\": {
+            \"namespace\": \"android_app\",
+            \"package_name\": \"ai.qubit16.app\",
+            \"sha256_cert_fingerprints\": [\"REPLACE_WITH_RELEASE_SHA256_FINGERPRINT\"]
+          }
+        }]
+    </string>
+</resources>

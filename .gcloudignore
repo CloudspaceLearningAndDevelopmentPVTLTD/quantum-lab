@@ -1,0 +1,12 @@
+# What `gcloud builds submit` uploads to Cloud Build. Committed explicitly
+# because otherwise gcloud silently generates this file from .gitignore on
+# first use — better to see the rule than to be surprised by it.
+#
+# NOTE: this controls the UPLOAD only. What each docker-build step inside
+# cloudbuild.yaml sees is then filtered again by that build context's own
+# .dockerignore (root, services/api/, services/agent/). Keeping this file to
+# "everything git ignores, plus git's own metadata" means the upload matches
+# a fresh clone, which is exactly what the Dockerfiles were written against.
+.gcloudignore
+.git
+#!include:.gitignore

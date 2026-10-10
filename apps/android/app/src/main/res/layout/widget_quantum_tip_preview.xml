@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Static RemoteViews layout used only as the widget-picker preview and the
+  brief frame before Glance's first composition lands (Glance widgets still
+  need a plain-XML initialLayout/previewLayout — RemoteViews rules apply
+  here, so this is LinearLayout/TextView only, nothing from the real
+  Composable in QuantumTipWidget.kt). What the user actually sees on their
+  home screen is entirely Glance-rendered.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/widgetBackground"
+    android:padding="14dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_label"
+        android:textColor="@color/widgetAccent"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.08" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/widget_preview_body"
+        android:textColor="@color/widgetOnBackground"
+        android:textSize="14sp"
+        android:maxLines="3"
+        android:ellipsize="end" />
+</LinearLayout>

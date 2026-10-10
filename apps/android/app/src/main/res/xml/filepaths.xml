@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Required by androidbrowserhelper's FileProvider entry for the (unused
+     unless the browser needs to hand the app a downloaded file, e.g. a
+     saved-circuit export) share/download path. Scoped to the app's own
+     cache directory only. -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path name="twa_cache" path="/" />
+</paths>

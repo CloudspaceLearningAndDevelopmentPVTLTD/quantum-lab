@@ -1,0 +1,58 @@
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2
+pydantic-settings>=2
+qiskit>=1.0
+qiskit-aer>=0.14
+# NOT optional, despite being an "extra" in Qiskit's own docs. Every circuit
+# apps/web/lib/quantum.ts exports writes rotation angles as exact fractions of
+# pi ("ry(pi/3)"), which is also what qiskit.qasm3.dumps emits. Without this
+# package qiskit.qasm3.loads has no parser to delegate to, Qiskit's native
+# importer raises "unhandled expression for floating-point constant" on a bare
+# `pi`, and the QASM 2 reader refuses the 3.0 header — so parse_qasm() rejects
+# the teleportation preset outright and the hardware page cannot cost or run
+# it. tests/test_js_crosscheck.py::test_the_qasm3_importer_is_a_required_dependency
+# fails if this line is removed.
+qiskit-qasm3-import>=0.5
+pennylane>=0.40
+pennylane-lightning>=0.40
+python-dotenv>=1.0
+httpx>=0.27
+pytest>=8.0
+
+# ---------------------------------------------------------------------------
+# DURABILITY: shared job store + long-term job history
+# ---------------------------------------------------------------------------
+# Both are lazily imported (try/except ImportError) in app/jobs/store.py and
+# app/jobs/archive.py respectively, and both no-op cleanly when their env var
+# is unset — so leaving these two lines out still runs fine, same "degrades
+# gracefully" contract as the OPTIONAL EXTRAS below. They are installed
+# (not commented out) by default because REDIS_URL / DATABASE_URL are meant
+# to work the moment they're set on a deploy, without also remembering to add
+# a pip package at the same time — see infra/azure/deploy.sh's
+# ENABLE_MILESTONE_WORKLOADS section, which sets exactly these two.
+redis>=5.0                 # multi-process job store (REDIS_URL) — app/jobs/store.py
+psycopg[pool,binary]>=3.1  # durable job history (DATABASE_URL) — app/jobs/archive.py
+
+# ---------------------------------------------------------------------------
+# OPTIONAL EXTRAS
+# ---------------------------------------------------------------------------
+# The service imports every one of these lazily, inside try/except ImportError.
+# Installing them unlocks extra backends; leaving them out degrades gracefully.
+#
+# cirq>=1.3                  # Google Cirq simulator backend
+#
+# The three vendor hardware SDKs — qiskit-ibm-runtime, amazon-braket-sdk and
+# azure-quantum — MOVED OUT of this list and into requirements-hardware.txt,
+# which the Dockerfile installs by default.
+#
+# They were commented out here, which read like the same graceful-degradation
+# contract as the line above and was not. Every other optional extra degrades
+# to a backend you did not want; these three degrade to "the product's headline
+# feature answers 503 in every deployed environment". A token could not fix it,
+# because the import failed before the token was ever read.
+#
+#     pip install -r requirements-hardware.txt
+#
+# to get them in a local checkout. They are still imported lazily, so
+# installing them does not make credentials mandatory.

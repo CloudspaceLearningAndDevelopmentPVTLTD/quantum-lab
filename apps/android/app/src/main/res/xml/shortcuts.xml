@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Long-press the launcher icon shortcuts. Each is a plain ACTION_VIEW intent
+  at a real qubit16.ai URL, handled by the same LauncherActivity that verified
+  App Links use — there is no separate native screen behind any of these,
+  which is the whole point of a TWA: one implementation, everywhere.
+
+  Mirrors the three PWA shortcuts in apps/web/public/manifest.webmanifest,
+  plus two that are worth a shortcut slot only on a device that already has
+  the app installed: Learning Paths (2026-09-18) and Real Hardware.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="simulator"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_simulator"
+        android:shortcutShortLabel="@string/shortcut_simulator_short"
+        android:shortcutLongLabel="@string/shortcut_simulator_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ai.qubit16.app"
+            android:targetClass="ai.qubit16.app.LauncherActivity"
+            android:data="https://qubit16.ai/simulator" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="learn"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_learn"
+        android:shortcutShortLabel="@string/shortcut_learn_short"
+        android:shortcutLongLabel="@string/shortcut_learn_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ai.qubit16.app"
+            android:targetClass="ai.qubit16.app.LauncherActivity"
+            android:data="https://qubit16.ai/learn" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="paths"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_paths"
+        android:shortcutShortLabel="@string/shortcut_paths_short"
+        android:shortcutLongLabel="@string/shortcut_paths_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ai.qubit16.app"
+            android:targetClass="ai.qubit16.app.LauncherActivity"
+            android:data="https://qubit16.ai/paths" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="visualizations"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_viz"
+        android:shortcutShortLabel="@string/shortcut_viz_short"
+        android:shortcutLongLabel="@string/shortcut_viz_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="ai.qubit16.app"
+            android:targetClass="ai.qubit16.app.LauncherActivity"
+            android:data="https://qubit16.ai/visualizations" />
+    </shortcut>
+</shortcuts>

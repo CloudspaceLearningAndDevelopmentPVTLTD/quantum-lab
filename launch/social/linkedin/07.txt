@@ -1,0 +1,28 @@
+POST 7 — Thirteen papers, run live
+ATTACH: assets/07-run-this-paper-800.gif
+FIRST COMMENT: https://qubit16.ai/workbench/run-paper  |  https://claude.ai/artifact/Xhd71pnGJDGwYfbxbXaVSZ
+OPENING LINE: 71 chars (fold ~140)
+------------------------------------------------------------
+PASTE EVERYTHING BELOW THIS LINE
+------------------------------------------------------------
+
+Thirteen landmark quantum papers, each one executable in a browser tab.
+
+From CHSH in 1969 to Google's below-threshold error correction in 2024 — not a summary of the paper, the paper's own protocol.
+
+Each one runs on the site's own simulator and is checked against the number it published:
+
+· CHSH 1969 — bound S ≤ 2. We compute 2.828.
+· BB84 1984 — an intercept-resend attack should force ≈25% QBER. We measure 25% over 4,000 shots, with a clean channel as the control.
+· Grover 1996 — O(√N). One item in 256 in 12 queries against 128.
+· Teleportation 1993 — fidelity 1 once the two classical bits arrive.
+
+And then there is the fourth card in that animation, which is the reason I am posting this one.
+
+Google 2024 reported a logical error rate falling by Λ = 2.14 ± 0.02 per step in code distance, reaching 0.143% per cycle at d = 7. Our page does not reproduce that number, and says so on screen. The simplified surface-code model behind it has its own ~10% threshold and a different noise model — uncorrelated, not circuit-level, no repeated faulty syndrome rounds. What it honestly reproduces is the qualitative signature the paper was first to demonstrate on hardware: strictly monotonic suppression as distance grows.
+
+That caveat is written into the source, not bolted on afterwards. I would rather ship a tool that tells you where its model runs out than one that prints a confident number it has not earned — and if you are evaluating anyone's quantum demo, including ours, "what does this not reproduce" is the question worth asking first.
+
+Link in the first comment. Free, no account, nothing to install.
+
+#QuantumComputing #QuantumErrorCorrection #OpenScience #Research

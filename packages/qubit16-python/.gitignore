@@ -1,0 +1,9 @@
+# Build and test artefacts for this package only. Kept here rather than in the
+# repository root so the package stays self-contained if it is ever split out
+# and published from its own repository.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+dist/
+*.egg-info/

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  updatePeriodMillis is 0 on purpose: Glance widgets are refreshed by
+  QuantumTipWorker (WorkManager, see widget/QuantumTipWorker.kt) rather than
+  the OS's own >=30-minute update alarm, which is the pattern Google's own
+  Glance samples use — it gives control over exactly when content rotates
+  (once a day, on-device midnight) instead of an arbitrary OS-chosen tick.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:maxResizeWidth="300dp"
+    android:maxResizeHeight="220dp"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:previewLayout="@layout/widget_quantum_tip_preview"
+    android:description="@string/widget_label"
+    android:initialLayout="@layout/widget_quantum_tip_preview"
+    android:updatePeriodMillis="0" />

@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["REPLACE_WITH_APPLE_TEAM_ID.ai.qubit16.app"],
+        "components": [
+          { "/": "/api/*", "exclude": true },
+          { "/": "/embed/*", "exclude": true },
+          { "/": "/*" }
+        ]
+      }
+    ]
+  }
+}

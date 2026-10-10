@@ -1,0 +1,336 @@
+# Quantum Lab — CI.
+#
+# Five jobs, named so the PR check list reads like a sentence rather than a set
+# of slugs. Every one of them fails the build.
+#
+#   Preflight — env + lockfile
+#   Web — typecheck, lint, unit tests, build, bundle budgets
+#   Web — end-to-end (Playwright, chromium)
+#   API service — pytest (Qiskit + Aer + PennyLane)
+#   Agent service — pytest (LangChain + RAG)
+#
+# Runs on every push and pull request. The API job installs Node and the
+# repository's node_modules so the JS-vs-Qiskit cross-checks execute the real
+# apps/web/lib/quantum.ts; tests/test_js_bridge_available.py fails that job
+# rather than skipping if the bridge is missing. deploy.yml chains off a green
+# run on main.
+
+name: CI
+
+# Skipped for changes CI has nothing to test: prose, the docs site, launch
+# material, infra scripts, and the mobile shells (ios.yml / android.yml build
+# those). A full run is ~40 runner-minutes, and the organisation's included
+# Actions minutes ran out on 2026-10-09 after a day of docs-only pushes each
+# triggering the whole matrix. deploy.yml chains off CI, so a skipped CI
+# correctly means nothing to deploy.
+on:
+  push:
+    branches: ['**']
+    paths-ignore: &ci_ignore
+      - 'docs/**'
+      - 'website/**'
+      - 'mkdocs.yml'
+      - 'launch/**'
+      - 'infra/**'
+      - 'apps/ios/**'
+      - 'apps/android/**'
+      - '**/*.md'
+      - '.github/workflows/pages.yml'
+      - '.github/workflows/ios.yml'
+      - '.github/workflows/android.yml'
+      - '.github/workflows/deploy.yml'
+  pull_request:
+    branches: ['**']
+    paths-ignore: *ci_ignore
+
+# A second push to the same branch makes the first run irrelevant. Cancelling it
+# frees a runner instead of paying for an answer nobody will read.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Keeps `next build` from phoning home on every CI run.
+  NEXT_TELEMETRY_DISABLED: '1'
+  # DO NOT SET PW_CHROMIUM HERE. playwright.config.ts reads it as
+  # `executablePath: process.env.PW_CHROMIUM ?? undefined`, and `??` only falls
+  # through on null/undefined — an empty string would be passed to Playwright as
+  # a literal executable path and every test would fail to launch a browser.
+  # In this repo's dev container PW_CHROMIUM points at a pinned chromium; on a
+  # runner the variable must simply not exist, and `playwright install` below
+  # provides the browser instead. That is the whole of "handle both".
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Cheapest signal first: node builtins only, no install, no build. Catches a
+  # lockfile that has drifted from a workspace package.json before five minutes
+  # of installing discovers the same thing.
+  # ---------------------------------------------------------------------------
+  preflight:
+    name: Preflight — env + lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Preflight checks
+        run: node scripts/preflight.mjs
+
+  web:
+    name: Web — typecheck, lint, unit tests, build, bundle budgets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          # Caches ~/.npm (the download cache), which makes a cold `npm ci`
+          # fast. The node_modules cache below skips `npm ci` altogether.
+          cache: 'npm'
+
+      # node_modules is cached directly and keyed on the lockfile: the install
+      # is deterministic given that file, so a hit is safe to reuse verbatim.
+      # apps/web/node_modules is NOT in the path list because npm hoists
+      # everything to the root with this lockfile and never creates it —
+      # confirmed by running the install in an empty directory (484 packages,
+      # all at the root). Listing a path that never exists makes every cache
+      # save warn.
+      - name: Restore node_modules
+        id: node-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node20-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npx tsc --noEmit -p apps/web/tsconfig.json
+
+      # ESLint is now configured (apps/web/eslint.config.mjs, flat config) and
+      # `eslint` + `eslint-config-next` are devDependencies, so this runs for
+      # real. The self-enabling guard is KEPT so a branch that predates the
+      # config still reports honestly instead of failing.
+      #
+      # BUG FIXED, and it mattered: the guard used to be
+      #   if ls .eslintrc* eslint.config.* apps/web/.eslintrc* ... >/dev/null 2>&1
+      # `ls` exits NON-ZERO when ANY of its arguments does not match — and three
+      # of those four patterns never match in a repo that has exactly one config
+      # file. So the condition was false even WITH a config present, and lint
+      # would have gone on printing "NOT configured" forever while a fully
+      # working ESLint setup sat in the tree. Piping to `grep -q .` tests what
+      # was actually meant: did any pattern match anything.
+      - name: Lint (only if ESLint is configured)
+        run: |
+          if ls .eslintrc* eslint.config.* apps/web/.eslintrc* apps/web/eslint.config.* 2>/dev/null | grep -q .; then
+            npm run lint --workspace=web
+          else
+            echo "No ESLint config found — lint is NOT configured in this repo and was NOT run."
+            echo "Add apps/web/eslint.config.mjs (and eslint + eslint-config-next) and this step starts enforcing it."
+          fi
+
+      - name: Unit tests (vitest)
+        run: npm test --workspace=web
+
+      # The service worker check is source-level and needs no build, so it runs
+      # before the five-minute build rather than after it.
+      - name: Service worker invalidates on a new build
+        run: node scripts/check-sw-invalidation.mjs
+
+      - name: Build
+        run: npm run build --workspace=web
+
+      # Reads the build that just finished and compares per-route First Load JS
+      # against scripts/bundle-budgets.json. Fails the job naming the route and the
+      # overage in kB. This is the only thing standing between the repo and the next
+      # "a heavy dependency quietly landed on every route" regression — the last one
+      # (three.js, +131 kB on two routes) was found by hand, months late.
+      #
+      # NOTE ON WHAT THE BUDGETS MEASURE: this build runs with no
+      # NEXT_PUBLIC_SENTRY_DSN, so next.config.mjs does not apply withSentryConfig
+      # and no Sentry client code is bundled. The budgets therefore describe a
+      # DSN-less build. A production build WITH a DSN ships more than this and is
+      # not covered here. See docs/PERFORMANCE.md § "Third-party weight".
+      - name: Bundle budgets
+        run: node scripts/bundle-size.mjs
+
+      # The table is worth keeping even on a green run: it is the only per-route
+      # size history the project has, and `always()` means a failing budget still
+      # uploads the numbers that explain it.
+      - name: Upload bundle size report
+        if: always()
+        run: node scripts/bundle-size.mjs --json > bundle-size.json || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle-size
+          path: bundle-size.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+  e2e:
+    name: Web — end-to-end (Playwright, chromium)
+    # Depends on `web` so a type error or a failing unit test reports in ten
+    # seconds instead of after a browser download and a second build.
+    needs: web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Restore node_modules
+        id: node-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node20-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      # Keyed on the lockfile because the browser build Playwright wants is
+      # pinned by the @playwright/test version, and that version lives there.
+      # A stale browser against a new Playwright is a launch error, not a
+      # subtle failure, so this key is correct rather than merely convenient.
+      - name: Restore Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      # --with-deps installs the system libraries chromium needs on a bare
+      # ubuntu runner (libnss3, libatk, libgbm and friends). Those are apt
+      # packages, not part of the browser cache, so this runs even on a cache
+      # hit — it is fast when the browser is already there.
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.ts owns the server: its `webServer` block runs
+      # `npm run build && npm run start` in apps/web and waits for :3000. That
+      # means this job builds the app a second time. Left as is deliberately —
+      # removing the duplicate build means editing playwright.config.ts, which
+      # this workstream does not own, and the honest cost is about 90 seconds.
+      - name: Run end-to-end tests
+        run: npm run test:e2e --workspace=web
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  api:
+    name: API service — pytest (Qiskit + Aer + PennyLane)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Not cosmetic. The package is imported as `app.*`, so pytest must find
+        # services/api on sys.path. Running from here is the same thing the
+        # RUNBOOK tells a human to do, which keeps CI and local identical.
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          # Without this, setup-python hashes every requirements file in the
+          # repo, so touching the agent's requirements busts the API's cache.
+          cache-dependency-path: services/api/requirements.txt
+
+      # Node + the repo's node_modules (esbuild) are what let the JS-vs-Qiskit
+      # cross-checks run apps/web/lib/quantum.ts. Without them those suites
+      # skip, which is how a wrong QASM export stayed green for months;
+      # tests/test_js_bridge_available.py now fails the job instead.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Restore node_modules
+        id: node-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node20-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Node dependencies
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        working-directory: .
+        run: npm ci --no-audit --no-fund
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Proves the startup validator itself runs and exits 0 on an empty
+      # environment — the property the whole "deploys with no configuration"
+      # claim rests on. It exits non-zero on a misconfiguration.
+      - name: Environment validation (empty environment must pass)
+        run: python -m app.core.env_check
+
+      - name: Run tests
+        run: python -m pytest tests -q
+
+  agent:
+    name: Agent service — pytest (LangChain + RAG)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/agent
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            services/agent/requirements.txt
+            services/agent/requirements-dev.txt
+
+      # This used to be a hand-written `pip install pydantic pydantic-settings
+      # httpx qiskit qiskit-aer pytest python-dotenv` that omitted langchain,
+      # langchain-anthropic, langchain-core and anthropic — so CI tested an
+      # install nobody deploys, and any import of the LLM layer would have
+      # failed on the runner while passing locally. Install the file the image
+      # installs.
+      #
+      # requirements-dev.txt is that same file via `-r`, plus scikit-learn,
+      # which the RAG index-BUILDING tests need and the runtime deliberately
+      # does not ship (see that file's header). Without it this job reported 1
+      # failure and 9 errors — all `No module named 'sklearn'` — on every push,
+      # and the index builder went untested. The runtime set installed here is
+      # still byte-for-byte the one the image installs.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Environment validation (empty environment must pass)
+        run: python -m agent.env_check
+
+      - name: Run tests
+        run: python -m pytest tests -q

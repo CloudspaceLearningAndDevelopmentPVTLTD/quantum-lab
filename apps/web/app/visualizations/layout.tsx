@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { pageMetadata } from '@/lib/seo'
 import { VISUALIZATIONS } from '@/components/ui/Hero'
+import VizCallToAction from '@/components/ui/VizCallToAction'
 
 // The count was written out as "Eight" in both the title and the description.
 // It is the length of the catalogue this page renders; the ninth visualization
@@ -16,5 +17,10 @@ export const metadata: Metadata = pageMetadata({
 })
 
 export default function VisualizationsLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <VizCallToAction />
+    </>
+  )
 }

@@ -42,6 +42,7 @@ on:
   pull_request:
     branches: ['**']
     paths-ignore: *ci_ignore
+  workflow_dispatch:
 
 # A second push to the same branch makes the first run irrelevant. Cancelling it
 # frees a runner instead of paying for an answer nobody will read.

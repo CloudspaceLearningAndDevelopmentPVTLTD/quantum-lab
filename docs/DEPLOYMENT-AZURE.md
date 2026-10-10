@@ -184,7 +184,7 @@ secrets or env vars — that stays with `infra/azure/deploy.sh`. It is off until
 **Shortcut: `bash infra/azure/setup-github-oidc.sh` does steps 1, 2 and 5; steps 3 and 4 are already done.**
 
 1. Create an Entra app registration with a **federated credential** for
-   `repo:CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab:environment:production`, and give its
+   `repo:cdandlc/quantum-lab:environment:production`, and give its
    service principal `Contributor` on resource group `quantum-lab-rg` (that covers `az acr build`
    and `az containerapp update`).
 2. Repository **secrets**: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`.

@@ -12,7 +12,7 @@ hide:
 
 This site is the engineering documentation: the architecture, the physics engine and how it is verified, the security model, the test and deployment pipeline, and the practices the codebase is held to. It is written for engineers who want to understand, run, extend or audit the system.
 
-[Source on GitHub](https://github.com/CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab){ .md-button .md-button--primary }
+[Source on GitHub](https://github.com/cdandlc/quantum-lab){ .md-button .md-button--primary }
 [Open qubit16.ai](https://qubit16.ai){ .md-button }
 
 </div>

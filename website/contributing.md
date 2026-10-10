@@ -55,4 +55,4 @@ A diff you did not intend is the simulator changing physics under you; the rando
 
 - Questions, ideas and concerns: **hello@qubit16.ai** or **contact@cdandlc.com**, or call **+918214106158**
 - Security reports: please email rather than opening a public issue, and include the route or module and a reproduction
-- Source: [github.com/CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab](https://github.com/CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab)
+- Source: [github.com/cdandlc/quantum-lab](https://github.com/cdandlc/quantum-lab)

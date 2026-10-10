@@ -11,6 +11,6 @@ export const CONTACT_PHONE = '+918214106158'
 /** Engineering documentation (website/ in the repo, published to Cloudflare Pages). */
 export const DOCS_URL = 'https://docs.qubit16.ai/'
 /** The source. MIT. */
-export const REPO_URL = 'https://github.com/CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab'
+export const REPO_URL = 'https://github.com/cdandlc/quantum-lab'
 export const LEGAL_UPDATED = '2026-09-02'
 export const OPERATOR = 'Qubit16'

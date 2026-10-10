@@ -12,7 +12,7 @@
 set -euo pipefail
 export MSYS_NO_PATHCONV=1 # Git Bash would rewrite /subscriptions/... otherwise
 
-REPO="${REPO:-CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab}"
+REPO="${REPO:-cdandlc/quantum-lab}"
 RESOURCE_GROUP="${RESOURCE_GROUP:-quantum-lab-rg}"
 APP_NAME="quantum-lab-github-deploy"
 

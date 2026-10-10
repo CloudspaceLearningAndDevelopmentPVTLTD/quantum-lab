@@ -10,7 +10,7 @@ site_description: >-
   services, security, testing and deployment of the open-source platform by
   Cloudspace Learning and Development Private Limited.
 site_url: https://docs.qubit16.ai/
-repo_url: https://github.com/CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab
+repo_url: https://github.com/cdandlc/quantum-lab
 repo_name: quantum-lab
 edit_uri: edit/main/website/
 copyright: >-
@@ -89,7 +89,7 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/CloudspaceLearningAndDevelopmentPVTLTD/quantum-lab
+      link: https://github.com/cdandlc/quantum-lab
     - icon: fontawesome/solid/globe
       link: https://qubit16.ai
 

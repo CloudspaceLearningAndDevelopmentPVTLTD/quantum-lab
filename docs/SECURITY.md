@@ -893,3 +893,17 @@ set or SQL to run — before the code change means anything.
 
 Open a **private** security advisory on the GitHub repository. Please do not file a public
 issue. Include the request, the response, and what you believe the impact is.
+
+## Origin lockdown (the two dashboard steps, made runnable)
+
+The Container Apps answer on their own `*.azurecontainerapps.io` hostnames as
+well as through Cloudflare. Two steps close the direct path:
+
+1. `bash infra/azure/restrict-origin-to-cloudflare.sh` — allows only
+   Cloudflare's published ranges on the web and api apps (the agent already
+   has internal ingress). Every other address gets 403 from Azure. Re-run it
+   if Cloudflare changes its ranges; `--remove` undoes it.
+2. Cloudflare dashboard → the qubit16.ai zone → **SSL/TLS → Overview → Full
+   (strict)**, so the edge verifies the origin certificate.
+
+After both, `https://qubit16.ai` works and the raw app hostnames answer 403.

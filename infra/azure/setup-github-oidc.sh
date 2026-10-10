@@ -40,8 +40,11 @@ SP_ID="$(az ad sp list --filter "appId eq '$APP_ID'" --query "[0].id" -o tsv)"
 OWNER_ID="$(gh api "repos/$REPO" --jq .owner.id)"
 REPO_ID="$(gh api "repos/$REPO" --jq .id)"
 OWNER="${REPO%%/*}"; NAME="${REPO##*/}"
+# Keyed on the SUBJECT, not the credential name: after an organisation or
+# repository rename the subject changes while the name would not, and a
+# name-only check silently kept the old, now useless, subject.
 add_subject() { # <credential name> <subject>
-  if [ -z "$(az ad app federated-credential list --id "$APP_ID" --query "[?name=='$1'].name" -o tsv)" ]; then
+  if [ -z "$(az ad app federated-credential list --id "$APP_ID" --query "[?subject=='$2'].name" -o tsv)" ]; then
     FIC="$(mktemp)"
     printf '{"name":"%s","issuer":"https://token.actions.githubusercontent.com","subject":"%s","audiences":["api://AzureADTokenExchange"]}' "$1" "$2" > "$FIC"
     az ad app federated-credential create --id "$APP_ID" --parameters "@$FIC" >/dev/null
@@ -49,8 +52,9 @@ add_subject() { # <credential name> <subject>
     echo "==> Federated credential added: $2"
   fi
 }
-add_subject github-production-ids "repo:$OWNER@$OWNER_ID/$NAME@$REPO_ID:environment:production"
-add_subject github-production     "repo:$REPO:environment:production"
+SLUG="$(printf '%s' "$OWNER" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9\n' '-')"
+add_subject "github-production-ids-$SLUG" "repo:$OWNER@$OWNER_ID/$NAME@$REPO_ID:environment:production"
+add_subject "github-production-$SLUG"     "repo:$REPO:environment:production"
 
 echo "==> Granting Contributor on $RESOURCE_GROUP (retries while the principal propagates)"
 for _ in 1 2 3 4 5 6; do

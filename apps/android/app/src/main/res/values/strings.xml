@@ -22,19 +22,17 @@
       with it, so being briefly out of date fails safe rather than breaking
       the app).
 
-      package_name and the sha256_cert_fingerprints entry below MUST equal
-      apps/web/public/.well-known/assetlinks.json exactly — see
-      docs/ANDROID.md "Digital Asset Links" for how the fingerprint is
-      produced and why there are two entries (debug key for local testing,
-      release key for what Play actually ships).
+      This is the app's half of Digital Asset Links: it names the website it
+      trusts. The website's half, apps/web/public/.well-known/assetlinks.json,
+      names this package and the SHA-256 of the certificate Play signs it
+      with — see docs/ANDROID.md "Digital Asset Links".
     -->
     <string name="asset_statements" translatable="false">
         [{
           \"relation\": [\"delegate_permission/common.handle_all_urls\"],
           \"target\": {
-            \"namespace\": \"android_app\",
-            \"package_name\": \"ai.qubit16.app\",
-            \"sha256_cert_fingerprints\": [\"REPLACE_WITH_RELEASE_SHA256_FINGERPRINT\"]
+            \"namespace\": \"web\",
+            \"site\": \"https://qubit16.ai\"
           }
         }]
     </string>

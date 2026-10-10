@@ -95,21 +95,20 @@ readable source.
 Two files must agree, or App Links verification silently fails (the app still
 works, it just falls back to opening in the browser instead of itself):
 
-* `apps/web/public/.well-known/assetlinks.json` — served by the website
-* `apps/android/app/src/main/res/values/strings.xml`'s `asset_statements`
+* `apps/web/public/.well-known/assetlinks.json` — served by the website; names
+  the package and the SHA-256 fingerprints of the certificate Play signs the
+  app with. With Play App Signing that is Google's key, not the upload key:
+  Play Console → Protected with Play → Play Store protection → Play App
+  Signing → **App signing key certificate**. The file lists that fingerprint
+  plus Google's two hybrid signing certificates (download "certificates.zip"
+  on the same page; `openssl x509 -inform DER -in <cert> -noout -fingerprint
+  -sha256` prints each).
+* `apps/android/app/src/main/res/values/strings.xml`'s `asset_statements` —
+  the app's half, which only names the site (`namespace: web`, `site:
+  https://qubit16.ai`); no fingerprint goes there.
 
-Both currently say `REPLACE_WITH_RELEASE_SHA256_FINGERPRINT`. To fill them
-in, once you have a release signing key (§4):
-
-```sh
-keytool -list -v -keystore /path/to/release.keystore -alias <your-alias> \
-  | grep "SHA256:"
-```
-
-Paste that fingerprint (format `AA:BB:CC:...`, keep the colons) into both
-files, then deploy the web change (`assetlinks.json` needs nothing beyond a
-normal deploy — it is a static file in `public/`, no route or middleware
-touches `/.well-known/*`, confirmed in this session) and rebuild the app.
+The web file is live once the site deploys; verify with
+`https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://qubit16.ai&relation=delegate_permission/common.handle_all_urls`.
 
 Android re-verifies automatically; there is no manual "submit for review"
 step. You can check verification status on an installed device with:

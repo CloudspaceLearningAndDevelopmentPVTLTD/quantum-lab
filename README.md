@@ -39,7 +39,6 @@ A good first five minutes: open `/simulator`, load the **Bell State** preset, pr
 confirm you only ever get `00` and `11` — never `01` or `10`. That is entanglement, computed in
 your browser.
 
-Windows users: [`RUNBOOK.md`](RUNBOOK.md) is the PowerShell walkthrough, including the traps.
 
 ---
 
@@ -218,7 +217,6 @@ Read [`STATUS.md`](STATUS.md) first — what runs, what just closed, what is kno
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | The diagrams and the data model |
 | [`docs/adr/`](docs/adr/) | Decision records — the non-obvious calls and the failures that motivated them |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Every suite, every trap, the design rules |
-| [`RUNBOOK.md`](RUNBOOK.md) | Windows walkthrough and troubleshooting |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Vercel + Railway, or one box with Compose |
 | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Health endpoints, error shape, error tracking, CI |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Threat model, the pre-production checklist |

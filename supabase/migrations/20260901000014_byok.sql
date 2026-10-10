@@ -8,7 +8,7 @@
 -- to public.hardware_usage (billing) and it REPLACES two
 -- functions those files define (see the warning below).
 --
--- docs/HANDOFF.md §4 is the specification this implements.
+-- the internal handoff notes §4 is the specification this implements.
 -- docs/BYOK.md is what a user reads.
 --
 -- ############################################################
@@ -135,7 +135,7 @@ create table if not exists public.user_provider_credentials (
   -- one instance gets jobs placed on whichever one the SDK picks
   -- otherwise — how a job lands on the wrong plan and then polls as
   -- "not found". Same reasoning as IBM_QUANTUM_INSTANCE in
-  -- docs/HANDOFF.md §3.
+  -- the internal handoff notes §3.
   public_config jsonb not null default '{}'::jsonb,
 
   created_at   timestamptz not null default now(),

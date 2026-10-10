@@ -262,8 +262,8 @@ clean, 79/79 vitest files (**1296** tests), `next build` clean (**104** routes p
       `org_class_members`, nullable `org_assignments.class_id`), `lib/orgs/*`, two new API routes,
       instructor UI. Deleted class's assignments fall back to whole-licence. Same standing caveat
       as every schema file: **never run against a live Supabase project**, RLS untested live.
-- [x] **Launch content kit** — `launch/*.md` (HN, Reddit, YouTube scripts, "quantum in a week"),
-      kept **outside the repo** deliberately; every claim was written against code with pointers.
+- [x] **Launch content kit** — HN, Reddit and YouTube scripts, kept outside the public
+      repository; every claim was written against code with pointers.
       One count already went stale in this same phase: the HN post says "11-lesson course" and the
       QML lesson makes it 12 — flagged, to be fixed at posting time along with a fresh re-verify.
 
@@ -301,8 +301,7 @@ Six content agents with disjoint ownership, integrated and gated in one sweep. W
       eval set grown 25 → **31** questions and re-measured: **31/31 passed, 0 declined, 0 failed**
       (re-run during integration via `eval/offline_probe.mjs`, not trusted from the agent's
       self-report; per-topic numbers in `docs/TUTOR.md`, dated 2026-08-27).
-- [x] **9 YouTube scripts appended** — `launch/youtube-scripts.md` now carries **12 of 12**
-      planned video scripts.
+- [x] **9 YouTube scripts appended** — all 12 planned video scripts are written.
 
 Integration fixes (the gaps between six agents' local views and one tree):
 

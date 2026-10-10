@@ -497,7 +497,7 @@ if ! az containerapp show -n quantum-lab-agent -g "$RESOURCE_GROUP" >/dev/null 2
   CREATE_ARGS=(-n quantum-lab-agent -g "$RESOURCE_GROUP" --environment "$ENV_NAME"
     --image "$ACR_LOGIN_SERVER/quantum-lab/agent:$TAG"
     --registry-server "$ACR_LOGIN_SERVER" --registry-username "$ACR_USER" --registry-password "$ACR_PASS"
-    --target-port 8001 --ingress external
+    --target-port 8001 --ingress internal
     --min-replicas 0 --max-replicas 1 --cpu 0.25 --memory 0.5Gi
     --env-vars "${AGENT_ENV_VARS[@]}")
   if [ "${#AGENT_SECRETS[@]}" -gt 0 ]; then
@@ -518,10 +518,15 @@ else
     --image "$ACR_LOGIN_SERVER/quantum-lab/agent:$TAG" \
     --set-env-vars "${AGENT_ENV_VARS[@]}" >/dev/null
 fi
+# The agent has no authentication of its own; only the web app's /api/agent
+# route (auth, quota, message clamps) may reach it. Internal ingress makes it
+# resolvable from inside the Container Apps environment and nowhere else.
+# Idempotent, so an agent created external by an older version of this
+# script is moved inside on the next run.
+az containerapp ingress update -n quantum-lab-agent -g "$RESOURCE_GROUP" --type internal --target-port 8001 >/dev/null
 AGENT_FQDN="$(az containerapp show -n quantum-lab-agent -g "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)"
 AGENT_URL="https://$AGENT_FQDN"
-echo "==> agent: $AGENT_URL"
-curl -s -o /dev/null -w "   /api/agent/health -> %{http_code}\n" "$AGENT_URL/api/agent/health" || true
+echo "==> agent: $AGENT_URL (internal ingress — reachable only from the web app)"
 
 # ---------------------------------------------------------------- 6. web
 # ---- Which URL is the PUBLIC one? --------------------------------------
@@ -790,7 +795,7 @@ wire_secret IBM_QUANTUM_TOKEN a
 wire_secret AWS_ACCESS_KEY_ID a
 wire_secret AWS_SECRET_ACCESS_KEY a
 wire_secret AWS_DEFAULT_REGION a
-# Azure OpenAI as a tutor provider (docs/AZURE-CREDITS.md) — both runtimes.
+# Azure OpenAI as a tutor provider (the internal Azure-credits notes) — both runtimes.
 wire_secret AZURE_API_KEY wg
 wire_secret AZURE_API_BASE wg
 wire_secret AZURE_API_VERSION wg
@@ -828,7 +833,7 @@ az consumption budget create-or-update --budget-name quantum-lab-budget-50usd \
 #
 # WHAT AND WHY: Microsoft for Startups Founders Hub's $25,000 credit
 # milestone requires 5+ *distinct* Azure services with >=$1 spend each,
-# sustained ~60 days — see docs/AZURE-CREDITS.md. This deployment alone
+# sustained ~60 days — see the internal Azure-credits notes. This deployment alone
 # only touches 2 (Container Registry, Container Apps). This section adds
 # 3 more, on purpose, purely to diversify billed services toward that
 # milestone. It is a deliberate reversal of this script's own "minimal
@@ -861,7 +866,7 @@ if [ "${ENABLE_MILESTONE_WORKLOADS:-false}" = "true" ]; then
         --public-access 0.0.0.0-255.255.255.255 --yes >/dev/null 2>&1; then
       echo "   created"
       # Wired straight into app/jobs/archive.py's durable job-history table —
-      # see that module and docs/AZURE-CREDITS.md. Only possible on first
+      # see that module and the internal Azure-credits notes. Only possible on first
       # create: the admin password is generated here and Azure never returns
       # it again, so an "already exists" server on a re-run cannot be wired
       # automatically (see the else branch below).
@@ -996,7 +1001,7 @@ if [ "${ENABLE_MILESTONE_WORKLOADS:-false}" = "true" ]; then
 
   echo ""
   echo "   Founders Hub Milestone 3 needs these sustained ~60 days from whichever"
-  echo "   moment each finished wiring above — see docs/AZURE-CREDITS.md."
+  echo "   moment each finished wiring above — see the internal Azure-credits notes."
 fi
 
 # ------------------------------------------------------------- done
@@ -1008,7 +1013,7 @@ echo "   api:   $API_URL   (always-on, min-replicas 1 — public URL, but"
 echo "                      unauthenticated by default unless"
 echo "                      API_SHARED_SECRET is enforced — see"
 echo "                      docs/SECURITY.md; same exposure as the AWS kit)"
-echo "   agent: $AGENT_URL (scale-to-zero — bills \$0 at zero traffic, but"
+echo "   agent: $AGENT_URL (internal ingress; scale-to-zero — bills \$0 at zero traffic, but"
 echo "                      the first request after idle pays a real"
 echo "                      cold-start delay)"
 echo ""

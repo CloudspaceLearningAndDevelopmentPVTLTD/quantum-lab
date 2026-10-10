@@ -8,7 +8,7 @@
  *
  * WHOSE money depends on step 4b. By default it is the OPERATOR's vendor
  * allowance, metered by steps 5–6. When the caller has stored their own vendor
- * credential (BYOK, docs/HANDOFF.md §4) it is theirs, the job is recorded but
+ * credential (BYOK, the internal handoff notes §4) it is theirs, the job is recorded but
  * not metered, and steps 5–6 are replaced by `reserveByokJob`. Read the long
  * comment on that function before deciding a gate was skipped by accident.
  *
@@ -313,7 +313,7 @@ export async function POST(req: Request): Promise<Response> {
   // decisions even apply. A caller who has stored their own IBM token is
   // spending their own IBM allowance: this platform's monthly quota is
   // metering a cost it is not about to incur, and charging them a job of it
-  // would be charging for nothing. docs/HANDOFF.md §4.
+  // would be charging for nothing. the internal handoff notes §4.
   //
   // A STORE FAILURE REFUSES. It does not fall back to the operator's
   // credentials, and the distinction is the whole reason this is a try/catch

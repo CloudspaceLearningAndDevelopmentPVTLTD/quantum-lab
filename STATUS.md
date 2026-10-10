@@ -94,9 +94,9 @@ Tailwind 3.4, three 0.169; FastAPI + Qiskit/Aer + PennyLane; LangChain + LiteLLM
 - **End-to-end tests run in Chromium only** (desktop and mobile emulation); no
   WebKit or Firefox project. No screen-reader session has been run; the
   accessibility audit lists the untested criteria and routes.
-- **`services/agent` has no auth of its own** and relies on network placement
-  plus the web route's clamps; its `run_quantum_circuit` call does not send the
-  API shared secret and silently falls back to local Aer when the gate is on.
+- **`services/agent` is reachable only inside the Container Apps environment**
+  (internal ingress); the web route in front of it applies the auth, quota and
+  message clamps. Its own `run_quantum_circuit` tool simulates locally with Aer.
 - **No CodeQL or secret-scanning job in CI**; `npm audit` is run by hand on a
   schedule.
 - **iOS App Store submission** and **Android version 2 upload** are blocked on

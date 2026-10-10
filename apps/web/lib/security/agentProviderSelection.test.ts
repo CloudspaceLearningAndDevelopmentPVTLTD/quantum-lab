@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 // request handling (rate limiting, agent proxying, etc — covered elsewhere,
 // e.g. lib/security/agentClamps.test.ts). Azure is the newest of the four
 // providers, wired in alongside the Founders Hub milestone-3 infrastructure
-// — see docs/AZURE-CREDITS.md — and the only one needing three env vars
+// — see the internal Azure-credits notes — and the only one needing three env vars
 // together, not one, to count as usable.
 
 const PROVIDER_KEYS = [

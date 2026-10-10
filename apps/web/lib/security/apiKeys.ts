@@ -10,7 +10,7 @@
  * researcher could submit a circuit to real hardware by clicking, and could not
  * put that submission in a loop, in a CI job, or in a paper's reproduction
  * instructions. That is the difference between a tool somebody looks at and a
- * tool somebody uses. docs/COMPETITIVE-GAPS.md §3.2.
+ * tool somebody uses. the internal competitive review §3.2.
  *
  * ── What a key is ───────────────────────────────────────────────────────────
  *

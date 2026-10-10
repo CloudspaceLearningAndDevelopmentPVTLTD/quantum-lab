@@ -2060,7 +2060,7 @@ alter table public.webhook_endpoints enable row level security;
 -- hardware submission in a loop, in a CI job, or in a paper's
 -- reproduction instructions — which is the difference between a
 -- thing a researcher looks at and a thing a researcher uses.
--- docs/COMPETITIVE-GAPS.md §3.2.
+-- the internal competitive review §3.2.
 --
 -- ############################################################
 -- #  ONLY THE HASH IS STORED. This is the one place this      #
@@ -2452,7 +2452,7 @@ alter table public.analytics_events enable row level security;
 -- One row per IBM Runtime session this platform opened on an
 -- account's behalf. It exists for exactly one question — "did this
 -- account open this session?" — which `DELETE /api/hardware/session/
--- {id}` could not previously ask at all. docs/COMPETITIVE-GAPS.md
+-- {id}` could not previously ask at all. the internal competitive review
 -- §3.4 names the gap.
 --
 -- It is an OWNERSHIP record, not a LIVENESS record, and the
@@ -3315,7 +3315,7 @@ comment on view public.published_runs_public is
 --
 -- WHY A SURROGATE KEY AND A `scope` COLUMN rather than the
 -- obvious `user_id primary key`. A per-project or per-key budget
--- is the next thing a lab asks for (docs/PLAN-BEST-IN-CLASS.md
+-- is the next thing a lab asks for (the internal product plan
 -- C3, and C2's shared team quota lands beside it). With user_id
 -- as the primary key, adding one is a table rewrite and a
 -- migration of every existing row. With this shape it is:
@@ -4032,7 +4032,7 @@ grant execute on function public.estimated_job_cost_usd(text, integer) to servic
 -- to public.hardware_usage (billing) and it REPLACES two
 -- functions those files define (see the warning below).
 --
--- docs/HANDOFF.md §4 is the specification this implements.
+-- the internal handoff notes §4 is the specification this implements.
 -- docs/BYOK.md is what a user reads.
 --
 -- ############################################################
@@ -4159,7 +4159,7 @@ create table if not exists public.user_provider_credentials (
   -- one instance gets jobs placed on whichever one the SDK picks
   -- otherwise — how a job lands on the wrong plan and then polls as
   -- "not found". Same reasoning as IBM_QUANTUM_INSTANCE in
-  -- docs/HANDOFF.md §3.
+  -- the internal handoff notes §3.
   public_config jsonb not null default '{}'::jsonb,
 
   created_at   timestamptz not null default now(),

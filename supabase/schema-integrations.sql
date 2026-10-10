@@ -102,7 +102,7 @@ alter table public.webhook_endpoints enable row level security;
 -- hardware submission in a loop, in a CI job, or in a paper's
 -- reproduction instructions — which is the difference between a
 -- thing a researcher looks at and a thing a researcher uses.
--- docs/COMPETITIVE-GAPS.md §3.2.
+-- the internal competitive review §3.2.
 --
 -- ############################################################
 -- #  ONLY THE HASH IS STORED. This is the one place this      #

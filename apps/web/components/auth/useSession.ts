@@ -233,7 +233,7 @@ export function useSession(): UseSessionResult {
       // Land on /account, not the home page: that is where the signed-in
       // state, the plan and the launch trial are visible, and where `next`
       // is honoured. The origin must be on the Supabase project's redirect
-      // allow-list as `<origin>/**` (docs/LAUNCH-CHECKLIST.md) or Supabase
+      // allow-list as `<origin>/**` (see docs/OPERATIONS.md) or Supabase
       // falls back to its Site URL instead.
       let redirect: string | undefined
       if (typeof window !== 'undefined') {

@@ -12,7 +12,7 @@ import type { Metadata } from 'next'
  */
 export const SITE = {
   // Renamed from "Quantum Lab" to match the qubit16.ai domain — see
-  // docs/PUBLIC-RELEASE-PLAN.md. This constant drives every page title,
+  // the internal release plan. This constant drives every page title,
   // OG tag and sitemap entry via pageMetadata() below; the handful of
   // routes that hardcode the name directly in JSX (nav brand, welcome
   // page, layout.tsx metadata) were updated alongside this, not derived

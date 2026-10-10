@@ -17,7 +17,7 @@
 -- One row per IBM Runtime session this platform opened on an
 -- account's behalf. It exists for exactly one question — "did this
 -- account open this session?" — which `DELETE /api/hardware/session/
--- {id}` could not previously ask at all. docs/COMPETITIVE-GAPS.md
+-- {id}` could not previously ask at all. the internal competitive review
 -- §3.4 names the gap.
 --
 -- It is an OWNERSHIP record, not a LIVENESS record, and the

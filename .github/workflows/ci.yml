@@ -247,7 +247,7 @@ jobs:
       run:
         # Not cosmetic. The package is imported as `app.*`, so pytest must find
         # services/api on sys.path. Running from here is the same thing the
-        # RUNBOOK tells a human to do, which keeps CI and local identical.
+        # README tells a human to do, which keeps CI and local identical.
         working-directory: services/api
     steps:
       - uses: actions/checkout@v4

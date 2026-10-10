@@ -114,10 +114,6 @@ NEXT_PUBLIC_APP_URL=https://your-domain.example
 It is inlined at build time, so setting it in the dashboard changes nothing
 until a new build runs. §9 explains what breaks if you skip it.
 
-Before you deploy, change the `/docs` redirect in `vercel.json` — it points at
-`https://github.com/punith-naga/quantum-lab/tree/main/docs`, which is not your
-repository.
-
 ### 2.3 services/api on Railway
 
 The web app does not need this. It executes circuits on server-side simulators
@@ -555,7 +551,7 @@ Two things a rollback does not undo:
 
 A schema migration does not roll back either — §5.2 in particular is a deletion.
 
-`RUNBOOK.md` covers incident handling once the site is live; `docs/OPERATIONS.md`
+`docs/OPERATIONS.md`
 covers the day-to-day.
 
 ---

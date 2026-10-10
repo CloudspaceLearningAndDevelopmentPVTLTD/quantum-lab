@@ -1,7 +1,7 @@
 """has_llm_key must recognize all four supported providers, Azure included.
 
 Azure OpenAI is the newest of the four (wired in alongside the Founders Hub
-milestone-3 infrastructure — see docs/AZURE-CREDITS.md) and is the only one
+milestone-3 infrastructure — see the internal Azure-credits notes) and is the only one
 that needs two env vars, not one, to count as "configured": a key with no
 endpoint base is not a usable provider.
 """

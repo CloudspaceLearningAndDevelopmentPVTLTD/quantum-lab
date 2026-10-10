@@ -20,7 +20,7 @@ generates around.
 This was a deliberate call, not the default because it was easiest:
 
 * **This repo already decided not to chase re-implementation as a trophy.**
-  `docs/PLAN-BEST-IN-CLASS.md` says it about qubit count on the browser
+  `the internal product plan` says it about qubit count on the browser
   simulator; the same argument applies harder here. `lib/quantum.ts`, all 44+
   visualizations (several WebGL/Three.js), the AI tutor, hardware job
   submission, Stripe billing, the admin console, and the Learning Paths and

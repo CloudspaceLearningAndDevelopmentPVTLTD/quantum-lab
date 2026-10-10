@@ -351,7 +351,7 @@ provider to ask.
 
 `resilience_level` (TREX / ZNE / PEC) is **not** exposed. It is an
 `EstimatorV2` option and we do not call `EstimatorV2` — see
-docs/COMPETITIVE-GAPS.md §3.3.
+the internal competitive review §3.3.
 
 ### Results are stored now
 

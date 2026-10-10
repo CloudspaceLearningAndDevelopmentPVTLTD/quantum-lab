@@ -20,7 +20,6 @@ quantum-lab/
 ├── scripts/            preflight, bundle budgets, SW invalidation check, benchmarks
 ├── docs/               44 operator documents + docs/adr/ (9 decision records)
 ├── website/            this documentation site (MkDocs)
-├── launch/             go-to-market content (not code)
 ├── .github/workflows/  ci.yml · deploy.yml · ios.yml · pages.yml (docs → Cloudflare Pages)
 ├── docker-compose.yml  one-box deployment of all three services
 ├── cloudbuild.yaml     GCP Cloud Build alternative

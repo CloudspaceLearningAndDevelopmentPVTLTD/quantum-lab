@@ -63,4 +63,4 @@ cd services/api && uvicorn app.main:app --reload --port 8000     # optional
 cd services/agent && uvicorn agent.server:app --reload --port 8001  # optional
 ```
 
-`docker-compose.yml` runs all three with the services bound to loopback and an optional Redis profile. `scripts/setup.sh` (and `.ps1`) and `docs/RUNBOOK.md` cover a from-nothing setup on macOS, Linux and Windows.
+`docker-compose.yml` runs all three with the services bound to loopback and an optional Redis profile. `scripts/setup.sh` (and `.ps1`) cover a from-nothing setup on macOS, Linux and Windows.

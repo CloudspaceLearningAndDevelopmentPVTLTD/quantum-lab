@@ -10,7 +10,7 @@
  * session was not recorded anywhere on our side. A session id is opaque and is
  * only ever returned to the account that opened it, so the exposure was narrow
  * — somebody holding one could close it early, an annoyance rather than a
- * disclosure — but it was real, and docs/COMPETITIVE-GAPS.md §3.4 names it.
+ * disclosure — but it was real, and the internal competitive review §3.4 names it.
  * (Nothing here measures how guessable an IBM session id is; "narrow" rests on
  * it not being handed out, not on an entropy claim we cannot support.)
  * `public.runtime_sessions` (supabase/schema-sessions.sql) is the record; this

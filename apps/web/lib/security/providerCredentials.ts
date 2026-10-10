@@ -17,7 +17,7 @@
  *   · a lab with its own paid IBM instance, AWS account or Azure workspace can
  *     drive hardware it already pays for through this front end.
  *
- * docs/HANDOFF.md §4 is the specification; docs/BYOK.md is what a user reads.
+ * the internal handoff notes §4 is the specification; docs/BYOK.md is what a user reads.
  *
  * ── ENCRYPTED, NOT HASHED — and why that is not a downgrade ─────────────────
  *

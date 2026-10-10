@@ -37,11 +37,16 @@ permissions:
   contents: read
   id-token: write # OIDC to Azure, no stored client secret
 
+# Deployment-specific names live in repository variables (Settings → Secrets
+# and variables → Actions → Variables), not in this public file:
+#   ACR_NAME   the container registry name (az acr list -o table)
+#   API_URL    the api Container App's https URL, baked into the web image as
+#              NEXT_PUBLIC_API_URL
 env:
-  ACR_NAME: quantumlabacr14409
-  RESOURCE_GROUP: quantum-lab-rg
+  ACR_NAME: ${{ vars.ACR_NAME }}
+  RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP || 'quantum-lab-rg' }}
   PUBLIC_URL: https://qubit16.ai
-  API_URL: https://quantum-lab-api.icybay-dd842fc2.eastus.azurecontainerapps.io
+  API_URL: ${{ vars.API_URL }}
 
 jobs:
   deploy:
@@ -53,6 +58,12 @@ jobs:
     timeout-minutes: 60
     environment: production
     steps:
+      - name: Check the deployment variables are set
+        run: |
+          if [ -z "$ACR_NAME" ] || [ -z "$API_URL" ]; then
+            echo "::error::Set the ACR_NAME and API_URL repository variables (see the header of this workflow)."; exit 1
+          fi
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
@@ -141,13 +152,24 @@ jobs:
           # nothing about the deploy, so the public check is advisory.
           sleep 45
           for svc in ${{ steps.plan.outputs.services }}; do
-            fqdn="$(az containerapp show -n "quantum-lab-$svc" -g "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)"
+            read -r external fqdn <<<"$(az containerapp show -n "quantum-lab-$svc" -g "$RESOURCE_GROUP" --query '[properties.configuration.ingress.external, properties.configuration.ingress.fqdn]' -o tsv | tr '\n' ' ')"
+            # Run logs are public on a public repository; the origin hostnames
+            # (which sit behind Cloudflare) must not appear in them.
+            echo "::add-mask::$fqdn"
+            if [ "$external" != "true" ]; then
+              # Internal ingress (the agent): reachable only from inside the
+              # Container Apps environment, so the web app's own probe is the check.
+              curl -fsS --retry 8 --retry-delay 10 --retry-all-errors -A 'Mozilla/5.0 (qubit16 deploy smoke test)' "$PUBLIC_URL/api/agent" | grep -q '"source"' \
+                && echo "healthy: $svc (internal ingress, probed through $PUBLIC_URL/api/agent)" \
+                || echo "::warning::$svc has internal ingress and $PUBLIC_URL/api/agent did not answer from the runner (Cloudflare may block runner IPs)"
+              continue
+            fi
             case "$svc" in
               agent) path=/api/agent/health ;;
               *)     path=/api/health ;;
             esac
             curl -fsS --retry 8 --retry-delay 10 --retry-all-errors "https://$fqdn$path" >/dev/null
-            echo "healthy: $svc ($fqdn$path)"
+            echo "healthy: $svc ($path on its Container App hostname)"
             if [ "$svc" = web ]; then
               # The signed-out account page must offer sign-in, not the "no accounts" fallback.
               if curl -fsS "https://$fqdn/account" | grep -q "NEXT_PUBLIC_SUPABASE_URL"; then

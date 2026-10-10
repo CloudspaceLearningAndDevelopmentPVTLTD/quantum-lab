@@ -270,7 +270,7 @@ export function examPassed(input: {
 // ── the 7-day course (Quantum in a Week) ──────────────────────
 //
 // Subjects and bodies are transcribed from the launch draft
-// (launch/quantum-in-a-week.md) and its wiring notes are treated as binding:
+// (the "quantum in a week" course plan) and its wiring notes are treated as binding:
 //   • Plain text with ONE link per day (day 7 alone adds the /learn
 //     hand-off its draft ends on). The HTML part exists because sendEmail
 //     requires both parts, and it is the same words — no images, no web

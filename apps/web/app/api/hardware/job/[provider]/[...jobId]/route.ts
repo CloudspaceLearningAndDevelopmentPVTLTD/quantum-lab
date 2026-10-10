@@ -57,7 +57,7 @@
  * on the caller's own IBM token is invisible to the operator's token and vice
  * versa. Keying on the stored row rather than on what the caller has attached
  * right now is what keeps old jobs pollable after somebody adds or removes a
- * credential. docs/HANDOFF.md §4; the long comment on the branch below.
+ * credential. the internal handoff notes §4; the long comment on the branch below.
  */
 
 import {

@@ -39,7 +39,7 @@ this empty. If you do have several, copy the **CRN** of the one you want from
 the instances list. Leaving it empty means the SDK picks an instance for you,
 which is how a job lands on the wrong plan, with the wrong allowance, and then
 reports itself as **"not found"** when this site polls it. Same failure mode
-`IBM_QUANTUM_INSTANCE` exists to prevent for the operator (`docs/HANDOFF.md` §3).
+`IBM_QUANTUM_INSTANCE` exists to prevent for the operator (`the internal handoff notes` §3).
 
 ---
 
@@ -454,7 +454,7 @@ cannot present:
 
 ### Still unverified
 
-Consistent with `docs/HANDOFF.md` §7: **no job has ever been submitted to real
+Consistent with `the internal handoff notes` §7: **no job has ever been submitted to real
 hardware from this codebase**, with the operator's credentials or anyone's. The
 BYOK path is covered by offline tests that assert the presented credential is
 the one the SDK is built with, that it never reaches global settings, that two

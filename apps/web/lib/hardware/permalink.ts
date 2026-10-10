@@ -19,7 +19,7 @@
  * difference between a result that is reproducible (you know the machine you
  * would have to match) and one that is merely repeatable (you can press the
  * button again on a device that has since been recalibrated).
- * docs/PLAN-BEST-IN-CLASS.md §C1.
+ * the internal product plan §C1.
  *
  * ── What is published, and what is emphatically not ─────────────────────────
  *

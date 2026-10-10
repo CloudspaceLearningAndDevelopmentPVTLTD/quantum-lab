@@ -191,7 +191,7 @@ export async function forward(
    * particular NEVER from a field on the incoming request. A browser-supplied
    * token would be in browser memory, in any error report, and in whatever
    * logs the request passed through on its way here, which is precisely the
-   * shape docs/HANDOFF.md §4 rules out.
+   * shape the internal handoff notes §4 rules out.
    *
    * Null (the default) means "use the operator's credentials", which is the
    * behaviour every caller had before this parameter existed.

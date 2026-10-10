@@ -65,7 +65,7 @@
 --
 -- WHY A SURROGATE KEY AND A `scope` COLUMN rather than the
 -- obvious `user_id primary key`. A per-project or per-key budget
--- is the next thing a lab asks for (docs/PLAN-BEST-IN-CLASS.md
+-- is the next thing a lab asks for (the internal product plan
 -- C3, and C2's shared team quota lands beside it). With user_id
 -- as the primary key, adding one is a table rewrite and a
 -- migration of every existing row. With this shape it is:

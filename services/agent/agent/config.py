@@ -26,7 +26,7 @@ class Settings(BaseSettings):
             ``azure_api_base``/``azure_api_version`` and a deployment name in
             ``model`` (LiteLLM's ``azure/<deployment-name>`` form) — set only
             when ``ENABLE_MILESTONE_WORKLOADS`` provisioned an Azure OpenAI
-            resource (see docs/AZURE-CREDITS.md). Not part of the
+            resource (see the internal Azure-credits notes). Not part of the
             cheapest-first default order: it isn't a free tier, so it's a
             selectable option here, not a default.
         azure_api_base: The Azure OpenAI resource's endpoint URL, e.g.
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
     #: "groq/llama-3.3-70b-versatile", "anthropic/claude-sonnet-4-6", or
     #: "azure/<deployment-name>" (the deployment name chosen when the Azure
     #: OpenAI resource was created — see infra/azure/deploy.sh and
-    #: docs/AZURE-CREDITS.md) to switch providers; only the env var changes,
+    #: the internal Azure-credits notes) to switch providers; only the env var changes,
     #: no code or redeploy of logic. LiteLLM (via langchain-litellm) is the
     #: open-source gateway that makes this a config change instead of four
     #: integrations — see docs/LLM-GATEWAY.md.

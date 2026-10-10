@@ -43,8 +43,6 @@ API errors share one shape from `lib/apiError.ts`: a stable code, an HTTP status
 | `docs/DEPLOYMENT.md` | Vercel + Railway and one-box Docker Compose paths, first-deploy checklist, rollback |
 | `docs/DEPLOYMENT-AZURE.md` | The production path (next page) |
 | `docs/DEPLOYMENT-AWS.md`, `docs/DEPLOYMENT-GCP.md` | App Runner and Cloud Run alternatives |
-| `docs/RUNBOOK.md` | A from-nothing local walkthrough including the Windows path |
 | `docs/STRIPE-SETUP.md` | Test-mode billing in fifteen minutes, with the smoke script |
-| `docs/LAUNCH-CHECKLIST.md` | Domain, DNS, email routing, store listings |
 
 Rollback is documented as a platform operation (promote the previous image or deployment) with the explicit note that it does not undo processed Stripe events, browser service-worker caches or schema migrations; migrations are idempotent and additive for that reason.

@@ -1,0 +1,289 @@
+<title>Qubit16 Bell Test</title>
+<style>
+@font-face{font-family:Inter;src:url(inter-latin-variable.woff2) format('woff2');font-weight:100 900;font-display:block}
+:root{
+  --bg:#07090f; --surface:#141a2c; --surface-2:#0d1120;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.16);
+  --ink:#eef2ff; --ink-2:#8fa3c8; --ink-3:#6d7c9e;
+  --violet:#7c6af9; --violet-t:#c4baff; --teal:#3bbfaa; --teal-t:#7ee8d8;
+  --sky:#5baaec; --amber:#f5a623; --amber-t:#fac96a; --rose:#e8547a; --rose-t:#f0899f;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;display:flex;justify-content:center;align-items:flex-start;overflow:hidden}
+.fit{width:800px;height:800px;transform-origin:top center}
+/* contain: the stage repaints every frame; isolating it keeps the rest of the
+   page out of the invalidation. */
+.stage{position:relative;width:800px;height:800px;overflow:hidden;background:var(--bg);contain:layout style paint}
+#aura{position:absolute;inset:-160px;background:
+  radial-gradient(640px 500px at 20% 24%, rgba(91,170,236,.24), transparent 62%),
+  radial-gradient(560px 460px at 86% 74%, rgba(232,84,122,.20), transparent 62%),
+  radial-gradient(520px 420px at 66% 6%, rgba(124,106,249,.20), transparent 62%)}
+.pad{position:absolute;inset:0;padding:36px 40px}
+
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:var(--violet-t)}
+.eyebrow .sep{color:#4b5578}
+.eyebrow .b{color:var(--teal-t)}
+.dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg in oklab,var(--sky),var(--rose));box-shadow:0 0 12px rgba(91,170,236,.9)}
+h1{margin-top:11px;font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.024em;text-wrap:balance}
+h1 em{font-style:normal;background:linear-gradient(100deg in oklab,#7ee8d8,#92ccf4 46%,#f0899f);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin-top:10px;font-size:14px;line-height:1.42;color:var(--ink-2);max-width:718px;text-wrap:pretty}
+.sub b{color:var(--ink);font-weight:600}
+
+.stagebox{position:absolute;left:40px;top:198px;width:468px;height:440px;border-radius:14px;overflow:hidden;
+  background:linear-gradient(170deg in oklab,#0e1322,#090c16);
+  box-shadow:0 0 0 1px rgba(255,255,255,.10),0 26px 70px -28px rgba(0,0,0,.95),0 0 64px -14px rgba(91,170,236,.32)}
+#plot{display:block;width:468px;height:440px}
+
+.side{position:absolute;left:532px;top:198px;width:228px;display:flex;flex-direction:column;gap:10px}
+.card{background:linear-gradient(165deg in oklab,rgba(20,26,44,.94),rgba(13,17,32,.9));
+  border:1px solid var(--line);border-radius:13px;padding:11px 13px;box-shadow:0 12px 34px -20px #000}
+.card .k{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3)}
+.card .v{margin-top:4px;font-size:27px;font-weight:800;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.card .n{margin-top:4px;font-size:10.5px;line-height:1.35;color:var(--ink-2);text-wrap:pretty}
+.v.quantum{background:linear-gradient(100deg in oklab,#7ee8d8,#92ccf4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.v.classical{color:var(--ink-3)}
+.v.hot{background:linear-gradient(100deg in oklab,#fac96a,#f0899f);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.terms{position:absolute;left:40px;top:652px;width:468px}
+.tlab{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+.tlab em{font-style:normal;color:var(--amber-t)}
+.trow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.term{border:1px solid var(--line);border-radius:10px;padding:7px 9px 8px;background:rgba(255,255,255,.03)}
+.term .tn{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--ink-3)}
+.term .tv{margin-top:2px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+
+footer{position:absolute;left:40px;right:40px;bottom:22px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-3)}
+footer .brand{font-weight:800;color:var(--ink);font-size:13px}
+footer .brand span{color:var(--violet)}
+footer .url{font-weight:600;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){#aura{transition:none}}
+</style>
+
+<div class="fit" id="fit">
+<div class="stage">
+  <div id="aura"></div>
+  <div class="pad">
+    <div class="eyebrow"><span class="dot"></span>Qubit16<span class="sep">/</span><span class="b">Advanced simulation</span><span class="sep">/</span>The Bell test</div>
+    <h1>Every local theory stalls at 2.<br><em>Nature reaches 2.828.</em></h1>
+    <p class="sub">CHSH, computed live. Turn the analysers and the correlation <b>S</b> climbs into a region no local hidden-variable theory can enter &mdash; then stops, exactly, at 2&radic;2.</p>
+
+    <div class="stagebox"><canvas id="plot" width="936" height="880"></canvas></div>
+
+    <div class="side">
+      <div class="card">
+        <div class="k">S right now</div>
+        <div class="v quantum" id="snow">2.000</div>
+        <div class="n" id="verdict">At the classical bound.</div>
+      </div>
+      <div class="card">
+        <div class="k">Local realism allows</div>
+        <div class="v classical">&le; 2.000</div>
+        <div class="n">Bell 1964, CHSH 1969. No hidden variable beats this.</div>
+      </div>
+      <div class="card">
+        <div class="k">Quantum ceiling</div>
+        <div class="v hot">2.828</div>
+        <div class="n">2&radic;2, the Tsirelson bound. Quantum mechanics stops here too.</div>
+      </div>
+      <div class="card">
+        <div class="k">Analyser offset</div>
+        <div class="v" id="angle">0&deg;</div>
+        <div class="n">Alice at 0 and 45&deg;, Bob swept together.</div>
+      </div>
+    </div>
+
+    <div class="terms">
+      <div class="tlab"><span>The four correlations &mdash; E(a,b) = &minus;cos 2(a&minus;b)</span><em id="sum">S = |E&#8321; &minus; E&#8322; + E&#8323; + E&#8324;|</em></div>
+      <div class="trow" id="trow"></div>
+    </div>
+
+    <footer>
+      <div class="brand">qubit16<span>.ai</span></div>
+      <div class="url">/visualizations/bell-test</div>
+    </footer>
+  </div>
+</div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// CHSH for the singlet state. E(a,b) = -cos 2(a-b) in the photon convention.
+// Alice fixed at 0 and 45 deg; Bob's pair swept together through the offset.
+// S peaks at 2*sqrt(2) when Bob sits at 22.5 and 67.5 deg. All exact.
+// ---------------------------------------------------------------------------
+const D2R = Math.PI / 180
+const A1 = 0, A2 = 45 * D2R
+const E = (a, b) => -Math.cos(2 * (a - b))
+
+function chsh(offsetDeg) {
+  const b1 = offsetDeg * D2R
+  const b2 = (offsetDeg + 45) * D2R
+  const e = [E(A1, b1), E(A1, b2), E(A2, b1), E(A2, b2)]
+  return { e, S: Math.abs(e[0] - e[1] + e[2] + e[3]) }
+}
+
+const TSIRELSON = 2 * Math.SQRT2
+const SWEEP = 90          // degrees covered by one loop
+const CV = document.getElementById('plot')
+const CX = CV.getContext('2d')
+const W = 936, H = 880
+const PAD_L = 92, PAD_R = 34, PAD_T = 42, PAD_B = 76
+const SMAX = 3.0
+
+const px = (deg) => PAD_L + (deg / SWEEP) * (W - PAD_L - PAD_R)
+const py = (s) => H - PAD_B - (s / SMAX) * (H - PAD_T - PAD_B)
+
+// Precompute the curve once — it never changes, only the marker moves.
+const CURVE = []
+for (let d = 0; d <= SWEEP; d += 0.25) CURVE.push([d, chsh(d).S])
+const PEAK = CURVE.reduce((a, c) => (c[1] > a[1] ? c : a), CURVE[0])
+
+function grid() {
+  CX.clearRect(0, 0, W, H)
+  CX.lineWidth = 2
+  CX.font = '600 19px Inter, sans-serif'
+  CX.textBaseline = 'middle'
+
+  // the band no local theory can enter
+  const top = py(SMAX), bound = py(2)
+  const band = CX.createLinearGradient(0, top, 0, bound)
+  band.addColorStop(0, 'rgba(232,84,122,.02)')
+  band.addColorStop(1, 'rgba(232,84,122,.16)')
+  CX.fillStyle = band
+  CX.fillRect(PAD_L, top, W - PAD_L - PAD_R, bound - top)
+
+  for (let s = 0; s <= SMAX; s += 0.5) {
+    const y = py(s)
+    CX.strokeStyle = 'rgba(255,255,255,.055)'
+    CX.beginPath(); CX.moveTo(PAD_L, y); CX.lineTo(W - PAD_R, y); CX.stroke()
+    CX.fillStyle = '#6d7c9e'
+    CX.textAlign = 'right'
+    CX.fillText(s.toFixed(1), PAD_L - 14, y)
+  }
+
+  // the two bounds that matter
+  const rule = (s, color, label, dash) => {
+    const y = py(s)
+    CX.save()
+    CX.setLineDash(dash)
+    CX.strokeStyle = color
+    CX.lineWidth = 3
+    CX.beginPath(); CX.moveTo(PAD_L, y); CX.lineTo(W - PAD_R, y); CX.stroke()
+    CX.restore()
+    CX.fillStyle = color
+    CX.textAlign = 'left'
+    CX.font = '800 18px Inter, sans-serif'
+    CX.fillText(label, PAD_L + 12, y - 19)
+    CX.font = '600 19px Inter, sans-serif'
+  }
+  rule(2, 'rgba(240,137,159,.95)', 'CLASSICAL LIMIT  2', [9, 8])
+  rule(TSIRELSON, 'rgba(126,232,216,.9)', 'TSIRELSON  2√2 = 2.828', [3, 7])
+
+  CX.fillStyle = '#6d7c9e'
+  CX.textAlign = 'center'
+  CX.font = '700 17px Inter, sans-serif'
+  for (let d = 0; d <= SWEEP; d += 22.5) CX.fillText(d + '°', px(d), H - PAD_B + 26)
+  CX.fillText("BOB'S ANGLE", (PAD_L + W - PAD_R) / 2, H - 18)
+  CX.save()
+  CX.translate(24, (PAD_T + H - PAD_B) / 2)
+  CX.rotate(-Math.PI / 2)
+  CX.fillText('S', 0, 0)
+  CX.restore()
+}
+
+function drawFrame(k, total) {
+  const t = k / total
+  const deg = t * SWEEP
+  const { e, S } = chsh(deg)
+
+  grid()
+
+  // curve, coloured by whether it has broken the classical bound
+  CX.lineWidth = 5
+  CX.lineJoin = 'round'
+  const g = CX.createLinearGradient(PAD_L, 0, W - PAD_R, 0)
+  g.addColorStop(0, '#5baaec')
+  g.addColorStop(0.5, '#7ee8d8')
+  g.addColorStop(1, '#5baaec')
+  CX.strokeStyle = g
+  CX.beginPath()
+  CURVE.forEach(([d, s], i) => (i ? CX.lineTo(px(d), py(s)) : CX.moveTo(px(d), py(s))))
+  CX.stroke()
+
+  // the part of the curve already traced, drawn hot
+  CX.strokeStyle = '#fac96a'
+  CX.lineWidth = 6
+  CX.shadowColor = 'rgba(250,201,106,.85)'
+  CX.shadowBlur = 22
+  CX.beginPath()
+  let started = false
+  for (const [d, s] of CURVE) {
+    if (d > deg) break
+    started ? CX.lineTo(px(d), py(s)) : (CX.moveTo(px(d), py(s)), (started = true))
+  }
+  CX.stroke()
+  CX.shadowBlur = 0
+
+  // peak marker, revealed once passed
+  if (deg >= PEAK[0]) {
+    CX.fillStyle = 'rgba(126,232,216,.95)'
+    CX.beginPath(); CX.arc(px(PEAK[0]), py(PEAK[1]), 7, 0, 7); CX.fill()
+  }
+
+  // live marker
+  const mx = px(deg), my = py(S)
+  CX.strokeStyle = 'rgba(255,255,255,.22)'
+  CX.lineWidth = 2
+  CX.setLineDash([4, 7])
+  CX.beginPath(); CX.moveTo(mx, my); CX.lineTo(mx, H - PAD_B); CX.stroke()
+  CX.setLineDash([])
+  CX.fillStyle = '#fff'
+  CX.shadowColor = '#fac96a'; CX.shadowBlur = 26
+  CX.beginPath(); CX.arc(mx, my, 10, 0, 7); CX.fill()
+  CX.shadowBlur = 0
+
+  document.getElementById('snow').textContent = S.toFixed(3)
+  document.getElementById('angle').textContent = deg.toFixed(1) + '°'
+  const v = document.getElementById('verdict')
+  v.textContent =
+    S > 2.8 ? 'At the Tsirelson bound. Nothing does better.'
+    : S > 2.0001 ? 'Above 2. No local hidden variable can do this.'
+    : 'At or below the classical bound.'
+
+  const names = ['E(a, b)', "E(a, b′)", "E(a′, b)", "E(a′, b′)"]
+  document.getElementById('trow').innerHTML = e
+    .map((val, i) => {
+      const hue = val < 0 ? '#92ccf4' : '#fac96a'
+      return `<div class="term"><div class="tn">${names[i]}</div>` +
+        `<div class="tv" style="color:${hue}">${val >= 0 ? '+' : '−'}${Math.abs(val).toFixed(3)}</div></div>`
+    })
+    .join('')
+}
+
+let driven = false
+window.frame = (k, total) => { driven = true; drawFrame(k, total) }
+drawFrame(0, 72)
+
+const fit = document.getElementById('fit')
+function resize() {
+  const s = Math.min(1, (document.documentElement.clientWidth - 16) / 800)
+  fit.style.transform = 'scale(' + s + ')'
+  document.body.style.height = (800 * s) + 'px'
+}
+addEventListener('resize', resize); resize()
+
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const PERIOD = 9000
+  const t0 = performance.now()
+  const tick = (now) => {
+    if (!driven) drawFrame(((((now - t0) % PERIOD) + PERIOD) % PERIOD) / PERIOD * 72, 72)
+    requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+} else {
+  drawFrame(36, 72)
+}
+</script>

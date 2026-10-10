@@ -1,0 +1,274 @@
+<title>Qubit16 MCP Endpoint</title>
+<style>
+@font-face{font-family:Inter;src:url(inter-latin-variable.woff2) format('woff2');font-weight:100 900;font-display:block}
+:root{
+  --bg:#07090f; --panel:#0d1120; --panel-2:#141a2c; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.15);
+  --ink:#eef2ff; --ink-2:#8fa3c8; --ink-3:#6d7c9e;
+  --violet:#7c6af9; --violet-t:#c4baff; --teal:#3bbfaa; --teal-t:#7ee8d8;
+  --sky:#5baaec; --amber:#f5a623; --amber-t:#fac96a; --rose:#e8547a; --rose-t:#f0899f;
+  --mono:'Cascadia Mono','Cascadia Code',Consolas,ui-monospace,Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+  display:flex;justify-content:center;align-items:flex-start;overflow:hidden}
+.fit{width:800px;height:800px;transform-origin:top center}
+.stage{position:relative;width:800px;height:800px;overflow:hidden;background:var(--bg);contain:layout style paint}
+#aura{position:absolute;inset:-160px;background:
+  radial-gradient(620px 480px at 18% 24%, rgba(124,106,249,.26), transparent 62%),
+  radial-gradient(560px 460px at 88% 66%, rgba(59,191,170,.20), transparent 62%),
+  radial-gradient(460px 400px at 62% 96%, rgba(232,84,122,.16), transparent 62%)}
+.pad{position:absolute;inset:0;padding:36px 40px}
+
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:var(--violet-t)}
+.eyebrow .sep{color:#4b5578}
+.eyebrow .b{color:var(--teal-t)}
+.dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg in oklab,var(--teal),var(--violet));box-shadow:0 0 12px rgba(59,191,170,.9)}
+h1{margin-top:12px;font-size:35px;line-height:1.05;font-weight:800;letter-spacing:-.025em;text-wrap:balance}
+h1 em{font-style:normal;background:linear-gradient(100deg in oklab,#7ee8d8,#c4baff 58%,#f0899f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin-top:11px;font-size:14px;line-height:1.45;color:var(--ink-2);max-width:712px;text-wrap:pretty}
+.sub b{color:var(--ink);font-weight:600}
+.sub code{font-family:var(--mono);font-size:12.5px;color:var(--teal-t);background:rgba(59,191,170,.10);border:1px solid rgba(59,191,170,.22);border-radius:5px;padding:1px 5px}
+
+.split{position:absolute;left:40px;right:40px;top:202px;height:330px;display:grid;grid-template-columns:1fr 252px;gap:16px}
+
+.term{position:relative;border-radius:14px;border:1px solid var(--line);background:linear-gradient(170deg in oklab,#0e1322,#090c16);
+  box-shadow:0 24px 60px -30px #000,0 0 0 1px rgba(124,106,249,.10);overflow:hidden;display:flex;flex-direction:column}
+.tbar{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.022)}
+.tbar .w{width:8px;height:8px;border-radius:50%}
+.tbar .t{margin-left:6px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.02em}
+.tbar .m{margin-left:auto;font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-t)}
+.code{flex:1;padding:13px 15px;font-family:var(--mono);font-size:12px;line-height:1.62;white-space:pre-wrap;word-break:break-word;color:#a7b6d6;overflow:hidden}
+.k{color:var(--violet-t)} .s{color:var(--teal-t)} .num{color:var(--amber-t)} .p{color:#5d6a8c} .dir{color:var(--rose-t);font-weight:700}
+.cur{display:inline-block;width:7px;height:14px;vertical-align:-2px;background:var(--teal-t);box-shadow:0 0 10px var(--teal)}
+
+.out{border-radius:14px;border:1px solid var(--line);background:linear-gradient(170deg in oklab,var(--panel-2),var(--panel));
+  box-shadow:0 24px 60px -30px #000;padding:14px;display:flex;flex-direction:column}
+.out .lab{font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.big{margin-top:2px;font-size:31px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+  background:linear-gradient(100deg in oklab,#7ee8d8,#c4baff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.note{margin-top:5px;font-size:11px;line-height:1.4;color:var(--ink-2);text-wrap:pretty}
+.bars{margin-top:12px;display:flex;align-items:flex-end;gap:9px;height:104px}
+.bcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.bfill{width:100%;border-radius:6px 6px 3px 3px;min-height:3px}
+.bkey{margin-top:7px;font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+.bval{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-bottom:5px;height:13px}
+.zero .bkey{color:#55627f}
+.split-note{margin-top:auto;padding-top:11px;border-top:1px solid var(--line);font-size:10.5px;line-height:1.4;color:var(--ink-3)}
+.split-note b{color:var(--ink);font-weight:700}
+
+.toolwrap{position:absolute;left:40px;right:40px;top:552px}
+.tlab{display:flex;justify-content:space-between;align-items:baseline;font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.tlab span{color:var(--teal-t)}
+.grid{margin-top:9px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.chip{font-family:var(--mono);font-size:10px;padding:6px 8px;border-radius:7px;border:1px solid var(--line);
+  background:rgba(255,255,255,.028);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.on{color:#fff;border-color:rgba(126,232,216,.55);background:linear-gradient(120deg in oklab,rgba(59,191,170,.26),rgba(124,106,249,.22));
+  box-shadow:0 0 22px -6px rgba(59,191,170,.9)}
+
+footer{position:absolute;left:40px;right:40px;bottom:24px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-3)}
+footer .brand{font-weight:800;color:var(--ink);font-size:13px}
+footer .brand span{color:var(--violet)}
+footer .url{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){.cur{box-shadow:none}}
+</style>
+
+<div class="fit" id="fit">
+<div class="stage">
+  <div id="aura"></div>
+  <div class="pad">
+    <div class="eyebrow"><span class="dot"></span>Qubit16<span class="sep">/</span><span class="b">MCP server</span><span class="sep">/</span>Seventeen tools, one endpoint</div>
+    <h1>Let your agent <em>run the circuit itself</em>.</h1>
+    <p class="sub">Qubit16 speaks the Model Context Protocol, so Claude Code, Claude Desktop or Cursor can drive the same engines the site runs on &mdash; stateless JSON over <code>POST /api/mcp/mcp</code>, <b>no SDK dependency, ~150 lines of transport</b>.</p>
+
+    <div class="split">
+      <div class="term">
+        <div class="tbar">
+          <span class="w" style="background:#e8547a"></span><span class="w" style="background:#f5a623"></span><span class="w" style="background:#3bbfaa"></span>
+          <span class="t">jsonrpc 2.0 &middot; streamable http</span>
+          <span class="m" id="tphase">request</span>
+        </div>
+        <div class="code" id="code"></div>
+      </div>
+      <div class="out" id="out"></div>
+    </div>
+
+    <div class="toolwrap">
+      <div class="tlab"><span id="tcount">Seventeen tools</span><span style="color:var(--ink-3)">11 core &middot; 1 verified generation &middot; 5 experiment record</span></div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <footer>
+      <div class="brand">qubit16<span>.ai</span></div>
+      <div class="url">docs/MCP.md</div>
+    </footer>
+  </div>
+</div>
+</div>
+
+<script>
+const TOOLS = [
+  'run_circuit', 'get_statevector_at_step', 'list_challenges',
+  'grade_challenge', 'list_lessons', 'get_lesson',
+  'get_gate_reference', 'generate_challenge', 'get_session_plan',
+  'export_notebook', 'submit_hardware_job', 'generate_verified_circuit',
+  'create_experiment', 'run_step', 'conclude_experiment',
+  'list_experiments', 'get_experiment',
+]
+
+const SCENES = [
+  {
+    tool: 'run_circuit',
+    req: `> tools/call
+{
+  "name": "run_circuit",
+  "arguments": {
+    "qasm": "OPENQASM 3.0; qubit[2] q;
+             h q[0]; cx q[0], q[1];",
+    "shots": 1024
+  }
+}`,
+    res: `< result
+{
+  "counts": { "00": 508, "11": 516,
+              "01": 0, "10": 0 },
+  "entropy": 1.0
+}`,
+    out: () => `
+      <div class="lab">Measured</div>
+      <div class="big">1024 shots</div>
+      <div class="note">One Bell pair, sampled in your browser.</div>
+      <div class="bars">
+        ${bar('00', 508, 520, '#7c6af9')}
+        ${bar('01', 0, 520, '#5baaec')}
+        ${bar('10', 0, 520, '#3bbfaa')}
+        ${bar('11', 516, 520, '#e8547a')}
+      </div>
+      <div class="split-note"><b>01 and 10 never happen.</b> That is the entanglement, not a rounding error.</div>`,
+  },
+  {
+    tool: 'get_statevector_at_step',
+    req: `> tools/call
+{
+  "name": "get_statevector_at_step",
+  "arguments": { "step": 2 }
+}`,
+    res: `< result
+{
+  "amplitudes": [0.7071, 0, 0, 0.7071],
+  "entanglement_entropy": 1.0
+}`,
+    out: () => `
+      <div class="lab">Amplitudes at step 2</div>
+      <div class="big">1.000</div>
+      <div class="note">Entanglement entropy, from the reduced density matrix.</div>
+      <div class="bars">
+        ${bar('00', 0.7071, 0.72, '#7c6af9', '.707')}
+        ${bar('01', 0, 0.72, '#5baaec', '0')}
+        ${bar('10', 0, 0.72, '#3bbfaa', '0')}
+        ${bar('11', 0.7071, 0.72, '#e8547a', '.707')}
+      </div>
+      <div class="split-note">Halt mid-circuit and read the state. <b>No hardware does this.</b></div>`,
+  },
+  {
+    tool: null,
+    req: `> tools/list
+{ }`,
+    res: `< result
+{
+  "tools": [ 17 entries ],
+  "protocolVersion": "2025-11-25"
+}`,
+    out: () => `
+      <div class="lab">Registered</div>
+      <div class="big">17 tools</div>
+      <div class="note">Run circuits, inspect states, grade challenges, build study plans, export notebooks, submit hardware jobs, write up experiments.</div>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px">
+        ${row('Core engine', '11', '#7c6af9')}
+        ${row('Verified generation', '1', '#3bbfaa')}
+        ${row('Experiment record', '5', '#f5a623')}
+      </div>
+      <div class="split-note">One bearer token adds <b>real hardware</b>. Everything else is open.</div>`,
+  },
+]
+
+function bar(key, v, max, hue, label) {
+  const h = Math.max(3, Math.round(104 * v / max))
+  const zero = v === 0 ? ' zero' : ''
+  return `<div class="bcol${zero}">
+    <div class="bval">${label !== undefined ? label : (v || '')}</div>
+    <div class="bfill" style="height:${h}px;background:linear-gradient(180deg in oklab,${hue},${hue}55);box-shadow:0 0 22px -6px ${hue}"></div>
+    <div class="bkey">${key}</div></div>`
+}
+function row(name, n, hue) {
+  return `<div style="display:flex;align-items:center;gap:10px">
+    <div style="width:5px;height:24px;border-radius:3px;background:${hue};box-shadow:0 0 16px -2px ${hue}"></div>
+    <div style="flex:1;font-size:12px;color:var(--ink-2)">${name}</div>
+    <div style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">${n}</div></div>`
+}
+
+// minimal JSON-ish highlighter over the already-sliced text
+function hl(txt) {
+  return txt
+    .replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+    .replace(/^(&gt;|&lt;)\s*([a-z/]+)/gm, '<span class="dir">$1 $2</span>')
+    .replace(/"([^"]*)"(\s*:)/g, '<span class="k">"$1"</span><span class="p">$2</span>')
+    .replace(/:\s*"([^"]*)"/g, ': <span class="s">"$1"</span>')
+    .replace(/([:[,]\s*)(-?\d+(?:\.\d+)?)/g, '$1<span class="num">$2</span>')
+}
+
+const gridEl = document.getElementById('grid')
+gridEl.innerHTML = TOOLS.map((t) => `<div class="chip" data-t="${t}">${t}</div>`).join('')
+const chips = [...gridEl.children]
+const codeEl = document.getElementById('code')
+const outEl = document.getElementById('out')
+const phaseEl = document.getElementById('tphase')
+
+let shown = -1
+function render(t) {
+  const n = SCENES.length
+  const pos = Math.max(0, Math.min(n - 0.0001, t * n))
+  const i = Math.floor(pos)
+  const u = pos - i
+  const sc = SCENES[i]
+
+  if (i !== shown) { shown = i; outEl.innerHTML = sc.out() }
+
+  // type the request, then the response, then hold
+  const full = sc.req + '\n\n' + sc.res
+  const reqLen = sc.req.length
+  let chars
+  if (u < 0.34) chars = Math.round(reqLen * (u / 0.34))
+  else if (u < 0.44) chars = reqLen
+  else if (u < 0.74) chars = reqLen + Math.round((full.length - reqLen) * ((u - 0.44) / 0.30))
+  else chars = full.length
+  phaseEl.textContent = chars <= reqLen ? 'request' : 'response'
+  phaseEl.style.color = chars <= reqLen ? 'var(--violet-t)' : 'var(--teal-t)'
+
+  const cursor = u < 0.74 ? '<span class="cur"></span>' : ''
+  codeEl.innerHTML = hl(full.slice(0, chars)) + cursor
+
+  chips.forEach((c) => c.classList.toggle('on', sc.tool ? c.dataset.t === sc.tool : u > 0.45))
+}
+
+let driven = false
+window.frame = (k, total) => { driven = true; render(k / total) }
+render(0)
+
+const fit = document.getElementById('fit')
+function resize() {
+  const s = Math.min(1, (document.documentElement.clientWidth - 16) / 800)
+  fit.style.transform = 'scale(' + s + ')'
+  document.body.style.height = (800 * s) + 'px'
+}
+addEventListener('resize', resize); resize()
+
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const PERIOD = 16500
+  const t0 = performance.now()
+  const tick = (now) => {
+    if (!driven) render(((((now - t0) % PERIOD) + PERIOD) % PERIOD) / PERIOD)
+    requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+}
+</script>

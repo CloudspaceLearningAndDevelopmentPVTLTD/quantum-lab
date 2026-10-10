@@ -5,7 +5,9 @@
       "namespace": "android_app",
       "package_name": "ai.qubit16.app",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_RELEASE_SHA256_FINGERPRINT"
+        "7E:AB:ED:3E:98:C6:73:60:F6:22:A8:12:36:56:77:A2:6B:BB:61:CF:10:E6:86:E9:8D:55:E0:9D:BF:0E:26:5C",
+        "7A:4A:BC:6A:85:5A:11:B0:17:C1:53:AC:A8:3E:17:02:63:20:0E:25:2A:D9:78:D8:10:6D:64:87:F0:43:D4:4F",
+        "F3:81:CC:5B:4C:67:79:07:BB:99:B1:58:FB:50:66:7C:1E:BD:40:B1:92:57:1C:FE:3C:CB:65:3E:D0:F0:8B:AF"
       ]
     }
   }
